@@ -1,5 +1,5 @@
 from rcs import Action, RcsFunctionalities, Card
-from rcs_types import RCSMessage, RCSCheckResult
+from rcs_types import RCSMessage
 
 check_rcs_functionality_action = Action(
     title="Check RCS Features",

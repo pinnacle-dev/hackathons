@@ -124,7 +124,7 @@ async def receive_msg(request: Request):
                 to=fromNumber,
                 text="Please enter the 10-digit phone number you would like to send an RCS message to. For example 1234567890",
             )
-            print(f"Send RCS message message sent to {fromNumber}")
+            print(f"Send RCS message sent to {fromNumber}")
         else:
             pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg)
             print(f"Error message sent to {fromNumber}")
