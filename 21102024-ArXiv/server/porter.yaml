@@ -29,8 +29,10 @@ services:
     timeoutSeconds: 3600
     sleep: false
 build:
-  context: ./21102024-ArXiv/server/arxiv
+  context: ./21102024-ArXiv/server/
   method: pack
   builder: heroku/buildpacks:20
+  buildpacks:
+    - heroku/python
 autoRollback:
   enabled: false
