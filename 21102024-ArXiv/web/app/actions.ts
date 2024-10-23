@@ -3,7 +3,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { z } from "zod";
 import { PinnacleClient } from "rcs-js";
-import { NextResponse } from "next/server";
 
 const Subscriber = z.object({
   name: z.string().min(1, "Name is required"),
@@ -169,18 +168,6 @@ export async function sendText(number: string): Promise<boolean> {
     return false;
   }
 }
-
-// Add this new type for the webhook payload
-type WebhookPayload = {
-  messageType: string;
-  buttonPayload: {
-    title: string;
-    payload: string;
-    execute: string;
-    sent: string;
-    fromNum: string;
-  };
-};
 
 export async function setUserSubscribed(phoneNumber: string): Promise<void> {
   try {

@@ -30,7 +30,6 @@ function SubmitButton() {
 export default function Home() {
   const [state, formAction] = useFormState(createSubscriber, initialState);
   const [existingNumber, setExistingNumber] = useState<string | null>(null);
-  const [registeredNumber, setRegisteredNumber] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
@@ -64,16 +63,12 @@ export default function Home() {
 
     if (state.isRegistered) {
       console.log("User registered successfully");
-      console.log;
       const match = state.message?.match(/\+\d+/);
       if (match) {
         console.log("Registered number found:", match[0]);
-        setRegisteredNumber(match[0]);
       } else {
         console.log("No phone number found in the message");
       }
-    } else {
-      setRegisteredNumber(null);
     }
   }, [state]);
 
