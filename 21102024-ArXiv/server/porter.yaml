@@ -1,47 +1,36 @@
 version: v2
-name: my-app
-
+name: arxiv
 services:
-  - name: api
+  - name: rcs-server
+    run: python rcs/rcs_server.py
     type: web
-    run: python 
+    instances: 1
+    cpuCores: 0.32
+    ramMegabytes: 470
+    terminationGracePeriodSeconds: 30
     port: 8000
-    cpuCores: 0.1
-    ramMegabytes: 256
     autoscaling:
       enabled: true
+      gpu: false
       minInstances: 1
-      maxInstances: 3
-      memoryThresholdPercent: 60
-      cpuThresholdPercent: 60
-    private: false
-    domains:
-      - name: test1.example.com
-    healthCheck:
-      enabled: true
-      httpPath: /healthz
-  - name: example-wkr
-    type: worker
-    run: echo 'work'
-    port: 8081
-    cpuCores: 0.1
-    ramMegabytes: 256
-    instances: 1
-  - name: example-job
+      maxInstances: 10
+      cpuThresholdPercent: 50
+      memoryThresholdPercent: 50
+      gpuThresholdPercent: 100
+      vramThresholdPercent: 100
+    sleep: false
+  - name: arxiv-cron
+    run: python arxiv/arxiv.py
     type: job
-    run: echo 'hello world'
-    allowConcurrent: true
-    cpuCores: 0.1
-    ramMegabytes: 256
-    cron: '*/10 * * * *'
-
-predeploy:
-  run: ls
-
+    cpuCores: 0.64
+    ramMegabytes: 1120
+    terminationGracePeriodSeconds: 30
+    cron: "0 8 * * * "
+    timeoutSeconds: 3600
+    sleep: false
 build:
-	method: docker
-	context: ./
-	dockerfile: ./app/Dockerfile
-
-env:
-  NODE_ENV: production
+  context: ./21102024-ArXiv/server/arxiv
+  method: pack
+  builder: heroku/buildpacks:20
+autoRollback:
+  enabled: false
