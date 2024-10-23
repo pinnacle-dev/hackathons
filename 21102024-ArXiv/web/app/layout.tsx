@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: "https://i.ibb.co/wyhW9pn/Pitch-Deck-Pinnacle-9.png",
+        url: "https://i.ibb.co/wyhW9pn/Pitch-Deck-Pinnacle-9.png", // raccoon image
         width: 1200,
         height: 630,
         alt: "ArXiv AI Paper Text Updates Preview",
