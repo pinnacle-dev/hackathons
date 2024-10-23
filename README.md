@@ -21,5 +21,4 @@ Each Monday, we're creating a couple fun projects that use RCS, so you can check
 - You can signup for access [here](https://www.trypinnacle.app/access)
 - We'll have a quick onboarding / intro call, then we can get you setup with your own agent to start sending RCS business messages
 
-That's it!
-Sean + Ivan
+That's it! - Sean + Ivan
