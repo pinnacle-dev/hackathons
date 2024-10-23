@@ -5,6 +5,10 @@ import httpx
 from datetime import datetime
 from typing import Union
 import json
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -25,6 +29,8 @@ class ButtonPayload(BaseModel):
 class Message(BaseModel):
     messageType: str
     messagePayload: Union[MessagePayload, ButtonPayload]
+
+RCS_URL = os.getenv("RCS_URL") # Set to dev / prod via this
 
 @app.post("/")
 async def receive_message(request: Request):
@@ -53,7 +59,7 @@ async def receive_message(request: Request):
     # Forward the message to the RCS listener
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post("http://localhost:3000/api/rcs_listener", json=data)
+            response = await client.post(url=RCS_URL, json=data)
             response.raise_for_status()
             return {"status": "Message received and forwarded to RCS listener"}
         except httpx.HTTPStatusError as e:
