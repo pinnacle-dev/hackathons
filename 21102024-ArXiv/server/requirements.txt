@@ -46,7 +46,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 rcs==1.0.12
 realtime==2.0.6
-requests==2.5.1
+requests==2.32.0
 requests-oauthlib==0.4.2
 s3transfer==0.10.3
 schedule==1.2.2
