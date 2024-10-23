@@ -4,7 +4,6 @@ import uvicorn
 import httpx
 from datetime import datetime
 from typing import Union
-from atom import ArxivSubscriber, get_all_subscribers
 import json
 
 app = FastAPI()

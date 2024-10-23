@@ -9,7 +9,7 @@ import os
 import logging
 import schedule
 import time
-from rcs import Pinnacle
+from rcs import Pinnacle, Card, SendRcsResponse, Action, ActionType
 
 load_dotenv()
 
@@ -43,14 +43,24 @@ class ArxivSubscriber:
 def sendPapers(to: str, papers: List[ArxivPaper]):
     cards = []
     for paper in papers:
-        card = {
-            "title": paper.title,
-            "subtitle": f"{paper.creators}\n\n{paper.summary[:200]}...",
-        }
+        card: dict[Card] = Card(
+            title=paper.title,
+            subtitle = f"Views: {paper.views} | {paper.creators}",
+            media_url = "https://i.ibb.co/wyhW9pn/Pitch-Deck-Pinnacle-9.png",
+            buttons = [Action(
+                title="See Paper",
+                payload=paper.abstract_link,
+                type="openUrl"
+            ), Action(
+                title="Join Our Discord",
+                payload="https://discord.gg/tT3n4Gmf",
+                type="openUrl"
+            )]
+        )
         cards.append(card)
 
     try:
-        client.send.rcs(
+        res = client.send.rcs(
             from_="test",
             to=to,
             cards=cards,
@@ -62,6 +72,7 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
                 }
             ]
         )
+        print(f"res {res}")
         logging.info(f"Successfully sent {len(papers)} papers to {to}")
         print(f"Successfully sent {len(papers)} papers to {to}")
     except Exception as e:
@@ -161,14 +172,29 @@ def get_most_popular_papers(limit=3) -> List[ArxivPaper]:
     
     popular_papers = []
     for paper_data in result.data:
+        # Handle datetime parsing with potential fractional seconds
+        try:
+            updated = datetime.fromisoformat(paper_data['updated'])
+        except ValueError:
+            # If parsing fails, remove microseconds and try again
+            updated_str = paper_data['updated'].split('.')[0]
+            updated = datetime.fromisoformat(updated_str)
+
+        try:
+            published = datetime.fromisoformat(paper_data['published'])
+        except ValueError:
+            # If parsing fails, remove microseconds and try again
+            published_str = paper_data['published'].split('.')[0]
+            published = datetime.fromisoformat(published_str)
+
         paper = ArxivPaper(
             arxiv_id=paper_data['arxiv_id'],
             title=paper_data['title'],
-            updated=datetime.fromisoformat(paper_data['updated']),
+            updated=updated,
             abstract_link=paper_data['abstract_link'],
             summary=paper_data['summary'],
             categories=paper_data['categories'],
-            published=datetime.fromisoformat(paper_data['published']),
+            published=published,
             announce_type=paper_data['announce_type'],
             rights=paper_data['rights'],
             journal_reference=paper_data['journal_reference'],
@@ -212,6 +238,7 @@ def save_papers_to_supabase(papers):
     
     print(f"Final result: {saved_count} papers saved, {failed_count} papers failed to save.")
 
+
 def check_for_new_papers():
     logging.info("Checking for new papers...")
     print("Checking for new papers...")
@@ -226,6 +253,10 @@ def check_for_new_papers():
         # Filter out papers that are already in the database
         new_papers = [paper for paper in papers if paper.arxiv_id not in existing_paper_ids]
         
+        print(f"Total papers from RSS: {len(papers)}")
+        print(f"Existing paper IDs: {len(existing_paper_ids)}")
+        print(f"New papers: {len(new_papers)}")
+        
         if new_papers:
             print(f"Found {len(new_papers)} new papers.")
             save_papers_to_supabase(new_papers)
@@ -234,7 +265,7 @@ def check_for_new_papers():
             # Get the top 3 most popular papers
             top_papers = get_most_popular_papers(limit=3)
             
-            print(f"Top papers {top_papers}")
+            print(f"Top papers: {[paper.title for paper in top_papers]}")
             
             # Get all subscribers and send them the new papers and top 3 most popular papers
             subscribers = get_all_subscribers()
@@ -250,6 +281,15 @@ def check_for_new_papers():
     else:
         print("No papers retrieved from RSS feed.")
         logging.info("No papers retrieved from RSS feed.")
+
+    # Log the current state of the database
+    log_database_state()
+
+def log_database_state():
+    result = supabase.table('Arxiv').select('arxiv_id, title, updated').order('updated', desc=True).limit(5).execute()
+    logging.info("Current state of the database (5 most recent papers):")
+    for paper in result.data:
+        logging.info(f"ID: {paper['arxiv_id']}, Title: {paper['title']}, Updated: {paper['updated']}")
 
 def get_all_subscribers() -> List[ArxivSubscriber]:
     """
@@ -355,7 +395,7 @@ if __name__ == "__main__":
                         format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     # Schedule the job to run every hour
-    schedule.every(15).seconds.do(check_for_new_papers)
+    schedule.every(15).minutes.do(check_for_new_papers)
 
     logging.info("Starting ArXiv paper checker.")
     print("ArXiv paper checker started. Press Ctrl+C to stop.")
