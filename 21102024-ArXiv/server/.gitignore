@@ -1,0 +1,32 @@
+# Ignore sensitive files
+.env
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Ignore virtual environment
+venv/
+
+# Ignore log files
+*.log
+
+# Ignore database files
+*.db
+*.sqlite
+
+# Ignore configuration files that may contain sensitive information
+config.ini
+settings.json
+
+# Ignore any file with 'secret' in its name
+*secret*
+
+# Ignore API keys and tokens
+*api_key*
+*token*
+
+# Ignore backup files
+*.bak
+*.backup
