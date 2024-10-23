@@ -7,8 +7,6 @@ from dotenv import load_dotenv
 from mendeley import Mendeley
 import os
 import logging
-import schedule
-import time
 from rcs import Pinnacle, Card, SendRcsResponse, Action, ActionType
 
 load_dotenv()
@@ -328,17 +326,6 @@ def get_existing_paper_ids():
     result = supabase.table('Arxiv').select('arxiv_id').execute()
     return set(row['arxiv_id'] for row in result.data)
 
-def run_scheduler():
-    while True:
-        try:
-            schedule.run_pending()
-            time.sleep(1)
-        except Exception as e:
-            logging.error(f"An error occurred in the scheduler: {str(e)}")
-            print(f"An error occurred in the scheduler: {str(e)}")
-            # Reduced sleep time after an error
-            time.sleep(10)
-
 class TimedCache:
     def __init__(self, expiration_time):
         self.expiration_time = expiration_time
@@ -390,18 +377,9 @@ def get_views(DOI: str) -> int:
 
 if __name__ == "__main__":
     # Configure logging
-    print("Main run")
     logging.basicConfig(filename='arxiv_paper_updates.log', level=logging.INFO,
                         format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
-    # Schedule the job to run every hour
-    schedule.every(15).minutes.do(check_for_new_papers)
-
     logging.info("Starting ArXiv paper checker.")
-    print("ArXiv paper checker started. Press Ctrl+C to stop.")
-
-    # Run the job immediately once
     check_for_new_papers()
-
-    # Run the scheduler
-    run_scheduler()
+    logging.info("ArXiv paper checker finished.")
