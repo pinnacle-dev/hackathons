@@ -399,8 +399,8 @@ mendeley_session_cache = TimedCache(timedelta(minutes=30))
 
 def get_mendeley_session():
     def create_session():
-        CLIENT_ID = os.getenv("MENDELEY_ID")
-        CLIENT_SECRET = os.getenv("MENDELEY_SECRET_KEY")
+        CLIENT_ID = os.environ["MENDELEY_ID"]
+        CLIENT_SECRET = os.environ["MENDELEY_SECRET_KEY"]
 
         print(f"Initializing Mendeley session")
         print(f"Mendeley Client ID: {CLIENT_ID}")
