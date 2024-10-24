@@ -44,7 +44,7 @@ class ArxivSubscriber:
 def sendPapers(to: str, papers: List[ArxivPaper]):
     cards = []
     for paper in papers:
-        card: dict[Card] = Card(
+        card = Card(
             title=paper.title,
             subtitle=f"Views: {paper.views} | {paper.creators}",
             media_url="https://i.ibb.co/wyhW9pn/Pitch-Deck-Pinnacle-9.png",
