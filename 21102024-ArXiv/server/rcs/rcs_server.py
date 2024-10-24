@@ -57,26 +57,31 @@ async def receive_message(request: Request):
     # Log the raw request body
     body = await request.body()
     logger.info(f"Received raw body: {body.decode()}")
+    print(f"Received raw body: {body.decode()}")  # Added print statement
 
     # Parse the JSON data
     try:
         data = json.loads(body)
     except json.JSONDecodeError:
         logger.error("Invalid JSON data received")
+        print("Invalid JSON data received")  # Added print statement
         raise HTTPException(status_code=400, detail="Invalid JSON data")
 
     # Validate the message type
     if data["messageType"] not in ["message", "postback"]:
         logger.error(f"Invalid message type: {data['messageType']}")
+        print(f"Invalid message type: {data['messageType']}")  # Added print statement
         raise HTTPException(status_code=400, detail="Invalid message type")
     
     # Handle the message based on its type
     if data["messageType"] == "message":
         payload = data["messagePayload"]
         logger.info(f"Received message from {payload['fromNum']}: {payload['text']}")
+        print(f"Received message from {payload['fromNum']}: {payload['text']}")  # Added print statement
     else:  # postback
         payload = data["buttonPayload"]
         logger.info(f"Received postback from {payload['fromNum']}: {payload['title']} (Payload: {payload['payload']})")
+        print(f"Received postback from {payload['fromNum']}: {payload['title']} (Payload: {payload['payload']})")  # Added print statement
     
     # Forward the message to the RCS listener
     async with httpx.AsyncClient() as client:
@@ -84,6 +89,7 @@ async def receive_message(request: Request):
             response = await client.post(url=RCS_URL, json=data)
             response.raise_for_status()
             logger.info("Message successfully forwarded to RCS listener")
+            print("Message successfully forwarded to RCS listener")  # Added print statement
             return {"status": "Message received and forwarded to RCS listener"}
         except httpx.HTTPStatusError as e:
             logger.error(f"Error forwarding message to RCS listener: {str(e)}")
