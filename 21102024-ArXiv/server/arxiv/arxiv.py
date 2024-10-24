@@ -56,6 +56,11 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
                     payload="https://discord.gg/tT3n4Gmf",
                     type="openUrl"
                 ),
+                Action(
+                    title=f"Summarize {paper.title}",
+                    payload=f"PAPER_{paper.arxiv_id}",
+                    type="trigger"
+                ),
             ],
         )
         cards.append(card)
@@ -65,23 +70,13 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
             title = "Opt out",
             payload = "OPT_OUT",
             type = "trigger"
+        ),
+        Action(
+            title=f"About this project",
+            payload=f"ABOUT",
+            type="trigger"
         )
     ]
-
-    # Add quick replies for each paper
-    for paper in papers:
-        quick_replies.extend([
-            Action(
-                title=f"Summarize: Paper",
-                payload=f"PAPER_{paper.arxiv_id}",
-                type="trigger"
-            ),
-            Action(
-                title=f"About this project",
-                payload=f"ABOUT",
-                type="trigger"
-            )
-        ])
 
     try:
         res = client.send.rcs(
