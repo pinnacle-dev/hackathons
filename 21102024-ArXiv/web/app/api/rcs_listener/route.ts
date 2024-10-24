@@ -10,32 +10,21 @@ export async function POST(request: Request) {
   console.log("Received post");
 
   try {
-    const body = await request.json();
-    console.log(body);
+    const inboundMsg = await request.json();
 
-    if (body.messageType === "postback") {
-      const { buttonPayload } = body;
+    if (inboundMsg.messageType === "action") {
+      console.log("Received postback:", inboundMsg);
 
-      const { title, payload, execute, sent, fromNum } = buttonPayload;
-
-      console.log("Received postback:", {
-        title,
-        payload,
-        execute,
-        sent,
-        fromNum,
-      });
-
-      if (payload === "OPT_IN") {
+      if (inboundMsg.payload === "OPT_IN") {
         console.log("opted in");
-        await setUserSubscribed(fromNum);
-        await sendVerificationMessage(fromNum);
+        await setUserSubscribed(inboundMsg.from);
+        await sendVerificationMessage(inboundMsg.from);
       }
 
-      if (payload === "OPT_OUT") {
+      if (inboundMsg.payload === "OPT_OUT") {
         console.log("opted out");
-        await setUserUnsubscribed(fromNum);
-        await sendUnsubscribeConfirmation(fromNum);
+        await setUserUnsubscribed(inboundMsg.from);
+        await sendUnsubscribeConfirmation(inboundMsg.from);
       }
 
       return NextResponse.json({
