@@ -8,8 +8,6 @@
 
 # Ignore virtual environment
 venv/
-arxiv_venv/
-rcs_venv/
 
 # Ignore log files
 *.log

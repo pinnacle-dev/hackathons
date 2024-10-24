@@ -61,7 +61,7 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
         )
         cards.append(card)
 
-    quick_replies = [
+    quick_replies: List[Action] = [
         Action(
             title=f"About this project",
             payload=f"ABOUT",
@@ -80,13 +80,13 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
     ]
 
     try:
-        res = client.send.rcs(
-            from_="test",
-            to=to,
-            cards=cards,
-            quick_replies=quick_replies
-        )
-        print(f"res {res}")
+        # res = client.send.rcs(
+        #     from_="test",
+        #     to=to,
+        #     cards=cards,
+        #     quick_replies=quick_replies
+        # )
+        # print(f"res {res}")
         logging.info(f"Successfully sent {len(papers)} papers to {to}")
         print(f"Successfully sent {len(papers)} papers to {to}")
     except Exception as e:
