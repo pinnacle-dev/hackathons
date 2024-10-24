@@ -57,7 +57,7 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
                     type="openUrl"
                 ),
                 Action(
-                    title=f"Summarize {paper.title}",
+                    title=f"Summarize {paper.title[:15]}..." if len(paper.title) > 15 else f"Summarize {paper.title}",
                     payload=f"PAPER_{paper.arxiv_id}",
                     type="trigger"
                 ),
