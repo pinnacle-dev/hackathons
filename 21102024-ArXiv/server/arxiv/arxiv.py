@@ -47,15 +47,11 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
             media_url = "https://i.ibb.co/wyhW9pn/Pitch-Deck-Pinnacle-9.png",
             buttons = [
                 Action(
-                    title="See Paper",
+                    title="See Paper Abstract",
                     payload=paper.abstract_link,
                     type="openUrl"
                 ), 
-                Action(
-                    title="Join Our Discord",
-                    payload="https://discord.gg/tT3n4Gmf",
-                    type="openUrl"
-                ),
+
                 Action(
                     title=f"Summarize paper",
                     payload=f"PAPER_{paper.arxiv_id}",
@@ -67,15 +63,20 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
 
     quick_replies = [
         Action(
+            title=f"About this project",
+            payload=f"ABOUT",
+            type="trigger"
+        ),
+        Action(
+            title="Join Our Discord",
+            payload="https://discord.gg/tT3n4Gmf",
+            type="openUrl"
+        ),
+        Action(
             title = "Opt out",
             payload = "OPT_OUT",
             type = "trigger"
         ),
-        Action(
-            title=f"About this project",
-            payload=f"ABOUT",
-            type="trigger"
-        )
     ]
 
     try:
