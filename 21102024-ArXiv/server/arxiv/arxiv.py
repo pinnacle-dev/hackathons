@@ -7,12 +7,12 @@ from dotenv import load_dotenv
 from mendeley import Mendeley
 import os
 import logging
-from rcs import Pinnacle, Card, SendRcsResponse, Action, ActionType
+from rcs import Pinnacle, Card, Action
 
 load_dotenv()
 
 client = Pinnacle(
-    api_key=os.getenv("PINNACLE_API_KEY"),
+    api_key=os.environ["PINNACLE_API_KEY"],
 )
 
 
@@ -86,8 +86,8 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
 
 
 # Initialize Supabase client
-supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_KEY")
+supabase_url = os.environ["SUPABASE_URL"]
+supabase_key = os.environ["SUPABASE_KEY"]
 supabase: Client = create_client(supabase_url, supabase_key)
 
 
