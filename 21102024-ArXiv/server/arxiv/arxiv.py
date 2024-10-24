@@ -45,30 +45,50 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
             title=paper.title,
             subtitle = f"Views: {paper.views} | {paper.creators}",
             media_url = "https://i.ibb.co/wyhW9pn/Pitch-Deck-Pinnacle-9.png",
-            buttons = [Action(
-                title="See Paper",
-                payload=paper.abstract_link,
-                type="openUrl"
-            ), Action(
-                title="Join Our Discord",
-                payload="https://discord.gg/tT3n4Gmf",
-                type="openUrl"
-            )]
+            buttons = [
+                Action(
+                    title="See Paper",
+                    payload=paper.abstract_link,
+                    type="openUrl"
+                ), 
+                Action(
+                    title="Join Our Discord",
+                    payload="https://discord.gg/tT3n4Gmf",
+                    type="openUrl"
+                ),
+            ],
         )
         cards.append(card)
+
+    quick_replies = [
+        Action(
+            title = "Opt out",
+            payload = "OPT_OUT",
+            type = "trigger"
+        )
+    ]
+
+    # Add quick replies for each paper
+    for paper in papers:
+        quick_replies.extend([
+            Action(
+                title=f"Summarize: Paper",
+                payload=f"PAPER_{paper.arxiv_id}",
+                type="trigger"
+            ),
+            Action(
+                title=f"About this project",
+                payload=f"ABOUT",
+                type="trigger"
+            )
+        ])
 
     try:
         res = client.send.rcs(
             from_="test",
             to=to,
             cards=cards,
-            quick_replies=[
-                {
-                    "title": "Opt out",
-                    "payload": "OPT_OUT",
-                    "type": "trigger"
-                }
-            ]
+            quick_replies=quick_replies
         )
         print(f"res {res}")
         logging.info(f"Successfully sent {len(papers)} papers to {to}")
@@ -383,3 +403,4 @@ if __name__ == "__main__":
     logging.info("Starting ArXiv paper checker.")
     check_for_new_papers()
     logging.info("ArXiv paper checker finished.")
+
