@@ -90,14 +90,20 @@ async def receive_message(request: Request):
     # Forward the message to the RCS listener
     async with httpx.AsyncClient() as client:
         try:
+            # Update the RCS_URL to include the full path
+            logger.info(f"Attempting to forward message to: {RCS_URL}")
+            
             response = await client.post(url=RCS_URL, json=data)
             response.raise_for_status()
-            logger.info("Message successfully forwarded to RCS listener")
-            print("Message successfully forwarded to RCS listener")  # Added print statement
-            return {"status": "Message received and forwarded to RCS listener"}
+            
+            logger.info(f"Message successfully forwarded to RCS listener. Status code: {response.status_code}")
+            return {"status": "Message received and forwarded to RCS listener", "rcs_response": response.text}
         except httpx.HTTPStatusError as e:
-            logger.error(f"Error forwarding message to RCS listener: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error forwarding message to RCS listener: {str(e)}")
+            logger.error(f"HTTP error forwarding message to RCS listener: {e.response.status_code} - {e.response.text}")
+            raise HTTPException(status_code=500, detail=f"Error forwarding message to RCS listener: {e.response.status_code} - {e.response.text}")
+        except httpx.RequestError as e:
+            logger.error(f"Request error forwarding message to RCS listener: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Request error forwarding message to RCS listener: {str(e)}")
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
