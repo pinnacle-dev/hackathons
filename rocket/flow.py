@@ -22,7 +22,6 @@ PINNACLE_PENTHOUSE_PASSWORD = os.environ["PINNACLE_PENTHOUSE_PASSWORD"]
 @app.post("/")
 async def receive_msg(request: Request):
     json_data = await request.json()
-    print(request.headers.get("pinnacle-signing-secret"))
     if (
         request.headers.get("pinnacle-signing-secret")
         != os.environ["PINNACLE_SIGNING_SECRET"]
