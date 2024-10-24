@@ -53,8 +53,8 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
                 ), 
 
                 Action(
-                    title=f"Summarize {paper.arxiv_id[:2]}",
-                    payload=f"PAPER_{paper.arxiv_id}",
+                    title=f"Summarize {paper.arxiv_id[:2]}", # test
+                    payload=f"PAPER_{paper.arxiv_id}", 
                     type="trigger"
                 ),
             ],
