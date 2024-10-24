@@ -52,6 +52,10 @@ class Message(BaseModel):
 
 RCS_URL = os.getenv("RCS_URL") # Set to dev / prod via this
 
+@app.get("/")
+async def welcome():
+    return {"message": "Welcome to the Pinnacle API"}
+
 @app.post("/")
 async def receive_message(request: Request):
     # Log the raw request body
