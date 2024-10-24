@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
-from rcs_types import PayloadData
+from rcs_types import *
 from rcs import Pinnacle
+from pydantic import TypeAdapter
 import messages
 import database
 from dotenv import load_dotenv
@@ -21,48 +22,52 @@ PINNACLE_PENTHOUSE_PASSWORD = os.environ["PINNACLE_PENTHOUSE_PASSWORD"]
 @app.post("/")
 async def receive_msg(request: Request):
     json_data = await request.json()
-    payload = PayloadData(**json_data)
+    print(request.headers.get("pinnacle-signing-secret"))
+    if (
+        request.headers.get("pinnacle-signing-secret")
+        != os.environ["PINNACLE_SIGNING_SECRET"]
+    ):
+        print("Invalid signing secret")
+        return
 
-    fromNumber = (
-        payload.messagePayload.fromNum
-        if payload.messagePayload
-        else payload.buttonPayload.fromNum if payload.buttonPayload else None
-    )
+    inbound_msg = TypeAdapter(InboundMessage).validate_python(json_data)
+    print(inbound_msg)
+
+    fromNumber = inbound_msg.from_
 
     if not fromNumber:
         print("No fromNumber found in payload")
         return
 
     message_history = database.get(fromNumber)
-    print(payload)
-    if payload.messagePayload and payload.messagePayload.text:
+    if isinstance(inbound_msg, InboundTextMessage):
         if message_history and len(message_history) > 0:
             prev_action = message_history[-1]
-            if prev_action.buttonPayload:
-                selected_action = prev_action.buttonPayload.payload
+            if isinstance(prev_action, InboundActionMessage):
+                selected_action = prev_action.payload
                 if selected_action == "share_wifi":
-                    if re.match(r"^\d{10}$", payload.messagePayload.text):
+                    if re.match(r"^\d{10}$", inbound_msg.text):
                         functionality = pinn.get_rcs_functionality(
-                            phone_number="+1" + payload.messagePayload.text
+                            phone_number="+1" + inbound_msg.text
                         )
                         if dict(functionality)["is_enabled"]:
                             pinn.send.rcs(
                                 from_=AGENT_ID,
-                                to="+1" + payload.messagePayload.text,
+                                to="+1" + inbound_msg.text,
                                 **messages.wifi_msg,
                             )
                         else:
-                            print("+1" + payload.messagePayload.text)
+                            print("+1" + inbound_msg.text)
                             pinn.send.mms(
                                 from_=os.environ["SMS_NUMBER"],
-                                to="+1" + payload.messagePayload.text,
+                                to="+1" + inbound_msg.text,
                                 text="Press and hold the WiFi icon to connect to the network.",
                                 media_urls=[
                                     "https://i.ibb.co/CnXB6tc/pinnacle-wifi.png",
                                 ],
                             )
 
-                        print(f"WiFi message sent to +1{payload.messagePayload.text}")
+                        print(f"WiFi message sent to +1{inbound_msg.text}")
 
                     else:
                         pinn.send.rcs(
@@ -80,8 +85,8 @@ async def receive_msg(request: Request):
         else:
             pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.intro_msg)
             print(f"Intro message sent to {fromNumber}")
-    elif payload.buttonPayload and payload.buttonPayload.payload:
-        action = payload.buttonPayload.payload
+    elif isinstance(inbound_msg, InboundActionMessage):
+        action = inbound_msg.payload
         if action == "get_wifi":
             pinn.send.rcs(
                 from_=AGENT_ID,
@@ -102,8 +107,8 @@ async def receive_msg(request: Request):
             print(f"Share WiFi message sent to {fromNumber}")
         elif action == "lock_door" or action == "unlock_door":
             print(f"Door {action} action requested")
-            if payload.buttonPayload.execute:
-                if payload.buttonPayload.execute == PINNACLE_PENTHOUSE_PASSWORD:
+            if inbound_msg.actionMetadata:
+                if inbound_msg.actionMetadata == PINNACLE_PENTHOUSE_PASSWORD:
                     await control_lock(locked=action == "lock_door")
                     pinn.send.rcs(
                         from_=AGENT_ID,
@@ -134,9 +139,9 @@ async def receive_msg(request: Request):
         pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg)
 
     if not message_history:
-        database.set(fromNumber, payload)
+        database.set(fromNumber, inbound_msg)
     else:
-        message_history.append(payload)
+        message_history.append(inbound_msg)
 
 
 if __name__ == "__main__":
