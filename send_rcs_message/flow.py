@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
-from rcs_types import PayloadData
+from rcs_types import *
+from pydantic import TypeAdapter
 from rcs import Pinnacle
 import messages
 import database
@@ -20,28 +21,32 @@ AGENT_ID = os.environ["PINNACLE_AGENT_ID"]
 @app.post("/")
 async def receive_msg(request: Request):
     json_data = await request.json()
-    payload = PayloadData(**json_data)
+    if (
+        request.headers.get("pinnacle-signing-secret")
+        != os.environ["PINNACLE_SIGNING_SECRET"]
+    ):
+        print("Invalid signing secret")
+        return
 
-    fromNumber = (
-        payload.messagePayload.fromNum
-        if payload.messagePayload
-        else payload.buttonPayload.fromNum if payload.buttonPayload else None
-    )
+    inbound_msg = TypeAdapter(InboundMessage).validate_python(json_data)
+    print(inbound_msg)
+
+    fromNumber = inbound_msg.from_
 
     if not fromNumber:
         print("No fromNumber found in payload")
         return
 
     message_history = database.get(fromNumber)
-    if payload.messagePayload and payload.messagePayload.text:
+    if isinstance(inbound_msg, InboundTextMessage):
         if message_history and len(message_history) > 0:
             prev_action = message_history[-1]
-            if prev_action.buttonPayload:
-                selected_action = prev_action.buttonPayload.payload
+            if isinstance(prev_action, InboundActionMessage):
+                selected_action = prev_action.payload
                 if selected_action == "check_rcs_functionality":
-                    if re.match(r"^\d{10}$", payload.messagePayload.text):
+                    if re.match(r"^\d{10}$", inbound_msg.text):
                         functionality = pinn.get_rcs_functionality(
-                            phone_number="+1" + payload.messagePayload.text
+                            phone_number="+1" + inbound_msg.text
                         )
                         pinn.send.rcs(
                             from_=AGENT_ID,
@@ -56,12 +61,12 @@ async def receive_msg(request: Request):
                         )
                         print(f"Error message sent to {fromNumber}")
                 elif selected_action == "send_rcs_message":
-                    if re.match(r"^\d{10}$", payload.messagePayload.text):
+                    if re.match(r"^\d{10}$", inbound_msg.text):
                         pinn.send.rcs(
                             from_=AGENT_ID,
                             to=fromNumber,
                             **messages.create_send_rcs_message_with_payload(
-                                "+1" + payload.messagePayload.text
+                                "+1" + inbound_msg.text
                             ),
                         )
 
@@ -71,6 +76,11 @@ async def receive_msg(request: Request):
                             from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg
                         )
                         print(f"Error message sent to {fromNumber}")
+                else:
+                    pinn.send.rcs(
+                        from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg
+                    )
+                    print(f"Error message sent to {fromNumber}")
             else:
                 pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg)
                 print(f"Error message sent to {fromNumber}")
@@ -78,12 +88,11 @@ async def receive_msg(request: Request):
         else:
             pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.intro_msg)
             print(f"Intro message sent to {fromNumber}")
-    elif payload.buttonPayload and payload.buttonPayload.payload:
-        action = payload.buttonPayload.payload
+    elif isinstance(inbound_msg, InboundActionMessage):
+        action = inbound_msg.payload
 
         try:
-            rcs_msg_type = json.loads(action)
-            print(rcs_msg_type, rcs_msg_type["type"], rcs_msg_type["to"])
+            rcs_msg_type = json.loads(action) if action else None
         except json.JSONDecodeError:
             rcs_msg_type = None
 
@@ -132,9 +141,9 @@ async def receive_msg(request: Request):
         pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg)
 
     if not message_history:
-        database.set(fromNumber, payload)
+        database.set(fromNumber, inbound_msg)
     else:
-        message_history.append(payload)
+        message_history.append(inbound_msg)
 
 
 if __name__ == "__main__":
