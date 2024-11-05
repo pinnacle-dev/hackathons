@@ -10,8 +10,10 @@ services:
   terminationGracePeriodSeconds: 30
   port: 3000
   sleep: false
+  domains:
+      - name: hackathons.trypinnacle.app/arxiv
 - name: arxiv-listener
-  run: python3 ./21102024-ArXiv/server/rcs/rcs_server.py
+  run: python3 ./21102024-ArXiv/server/rcs/start.sh
   type: web
   instances: 1
   cpuCores: 0.16
@@ -19,8 +21,10 @@ services:
   terminationGracePeriodSeconds: 30
   port: 8000
   sleep: false
+  domains:
+      - name: hackathons.trypinnacle.app/arxiv-listener
 - name: general-rcs
-  run: python3 ./send_rcs_message/flow.py
+  run: python3 ./send_rcs_message/start.sh
   type: web
   instances: 1
   cpuCores: 0.16
@@ -29,8 +33,10 @@ services:
   port: 8000
   private: true
   sleep: false
+  domains:
+      - name: hackathons.trypinnacle.app/general-rcs
 - name: rocket
-  run: python3 ./rocket/flow.py
+  run: python3 ./rocket/start.sh
   type: web
   instances: 1
   cpuCores: 0.16
@@ -39,8 +45,10 @@ services:
   port: 8000
   private: true
   sleep: false
+  domains:
+      - name: hackathons.trypinnacle.app/rocket
 - name: arxiv-worker
-  run: python3 ./21102024-ArXiv/server/arxiv/arxiv.py
+  run: python3 ./21102024-ArXiv/server/arxiv/start.sh
   type: job
   cpuCores: 0.16
   ramMegabytes: 300
