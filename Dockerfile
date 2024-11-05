@@ -5,7 +5,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install Python3, pip, node, npm, and typescript
 RUN apt-get update
 RUN apt-get install -y python3 python3-pip nodejs npm
-RUN npm install -g typescript
 RUN apt-get clean
 
 # Install dependencies for pyenv
@@ -28,6 +27,7 @@ RUN pyenv global 3.9.6
 # Update node to v20.10.0
 RUN npm install -g n
 RUN n 20.10.0
+RUN npm install -g typescript
 
 WORKDIR /app
 COPY . /app
