@@ -1,0 +1,56 @@
+version: v2
+name: hackathons
+services:
+- name: arxiv-form
+  run: bash ./21102024-ArXiv/web/start.sh
+  type: web
+  instances: 1
+  cpuCores: 0.16
+  ramMegabytes: 300
+  terminationGracePeriodSeconds: 30
+  port: 3000
+  sleep: false
+- name: arxiv-listener
+  run: python3 ./21102024-ArXiv/server/rcs/rcs_server.py
+  type: web
+  instances: 1
+  cpuCores: 0.16
+  ramMegabytes: 300
+  terminationGracePeriodSeconds: 30
+  port: 8000
+  sleep: false
+- name: general-rcs
+  run: python3 ./send_rcs_message/flow.py
+  type: web
+  instances: 1
+  cpuCores: 0.16
+  ramMegabytes: 300
+  terminationGracePeriodSeconds: 30
+  port: 8000
+  private: true
+  sleep: false
+- name: rocket
+  run: python3 ./rocket/flow.py
+  type: web
+  instances: 1
+  cpuCores: 0.16
+  ramMegabytes: 300
+  terminationGracePeriodSeconds: 30
+  port: 8000
+  private: true
+  sleep: false
+- name: arxiv-worker
+  run: python3 ./21102024-ArXiv/server/arxiv/arxiv.py
+  type: job
+  cpuCores: 0.16
+  ramMegabytes: 300
+  terminationGracePeriodSeconds: 30
+  cron: "0 0 * * *\t"
+  timeoutSeconds: 3600
+  sleep: false
+build:
+  context: ./
+  method: docker
+  dockerfile: ./Dockerfile
+autoRollback:
+  enabled: false
