@@ -1,0 +1,16 @@
+from enum import Enum
+
+class LegislationType(str, Enum):
+    HOUSE_BILL = "HR"
+    SENATE_BILL = "S"
+    HOUSE_JOINT_RESOLUTION = "HJRES"
+    SENATE_JOINT_RESOLUTION = "SJRES"
+    HOUSE_CONCURRENT_RESOLUTION = "HCONRES"
+    SENATE_CONCURRENT_RESOLUTION = "SCONRES"
+    HOUSE_RESOLUTION = "HRES"
+    SENATE_RESOLUTION = "SRES"
+
+class AmendmentType(str, Enum):
+    HOUSE_AMENDMENT = "HAMDT"
+    SENATE_AMENDMENT = "SAMDT"
+    SENATE_UNPRINTED_AMENDMENT = "SUAMDT" # Only for 97th and 98th Congresses 

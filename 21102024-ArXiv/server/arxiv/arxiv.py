@@ -51,7 +51,6 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
                     payload=paper.abstract_link,
                     type="openUrl"
                 ), 
-
                 Action(
                     title=f"Summarize {paper.arxiv_id[:2]}", # test
                     payload=f"PAPER_{paper.arxiv_id}", 
@@ -111,7 +110,7 @@ def get_most_recent_paper():
             return datetime.fromisoformat(updated_str)
     return None
 
-def get_arxiv_papers(category='cs.ai', since=None):
+def get_arxiv_papers(category='cs.ai', since=None) -> List[ArxivPaper]:
     """
     Fetch arXiv papers from the current RSS feed for a given category.
     
