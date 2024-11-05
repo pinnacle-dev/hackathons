@@ -18,7 +18,7 @@ pinn = Pinnacle(
 AGENT_ID = os.environ["PINNACLE_AGENT_ID"]
 
 
-@app.post("/")
+@app.post("/general_rcs")
 async def receive_msg(request: Request):
     json_data = await request.json()
     if (

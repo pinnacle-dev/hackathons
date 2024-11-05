@@ -19,7 +19,7 @@ AGENT_ID = os.environ["PINNACLE_AGENT_ID"]
 PINNACLE_PENTHOUSE_PASSWORD = os.environ["PINNACLE_PENTHOUSE_PASSWORD"]
 
 
-@app.post("/")
+@app.post("/rocket")
 async def receive_msg(request: Request):
     json_data = await request.json()
     if (
