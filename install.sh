@@ -4,8 +4,8 @@ default_python_install="python3 -m venv venv; source venv/bin/activate; pip inst
 
 declare -A projects=(
     ["21102024-ArXiv"]="cd web; npm install; cd ..;cd server; pip install -r requirements.txt"
-    ["rocket"]=default_python_install
-    ["send_rcs_message"]=default_python_install
+    ["rocket"]="$default_python_install"
+    ["send_rcs_message"]="$default_python_install"
 )
 
 for project in "${!projects[@]}"; do
