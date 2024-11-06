@@ -86,7 +86,11 @@ async def receive_msg(request: Request):
             print(f"Intro message sent to {fromNumber}")
     elif isinstance(inbound_msg, InboundActionMessage):
         action = inbound_msg.payload
-        if action == "get_wifi":
+        if action == "rocket_raccoon":
+            pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.intro_msg)
+            print(f"Intro message sent to {fromNumber}")
+
+        elif action == "get_wifi":
             pinn.send.rcs(
                 from_=AGENT_ID,
                 to=fromNumber,

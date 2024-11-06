@@ -117,7 +117,11 @@ async def receive_msg(request: Request):
                 print(f"Carousel message sent to {rcs_msg_type['to']}")
             return
 
-        if action == "check_rcs_functionality":
+        if action == "general_rcs":
+            pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.intro_msg)
+            print(f"Intro message sent to {fromNumber}")
+            return
+        elif action == "check_rcs_functionality":
             pinn.send.rcs(
                 from_=AGENT_ID,
                 to=fromNumber,

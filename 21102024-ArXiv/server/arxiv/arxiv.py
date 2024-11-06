@@ -110,8 +110,7 @@ def get_most_recent_paper():
             return datetime.fromisoformat(updated_str)
     return None
 
-
-def get_arxiv_papers(category="cs.ai", since=None):
+def get_arxiv_papers(category='cs.ai', since=None) -> List[ArxivPaper]:
     """
     Fetch arXiv papers from the current RSS feed for a given category.
 

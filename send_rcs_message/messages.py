@@ -151,7 +151,7 @@ read_more: RCSMessage = {
         Card(
             title="On The Potential of AI Personalization in SMS/RCS Messaging for Marketing",
             subtitle="Sean Roades - August 26, 2024\nIn today's fast-paced digital landscape, capturing and retaining customer attention is more challenging than ever. Enter AI-driven personalization and hyper-personalized workflows for SMS and RCS (Rich Communication Services) messaging - a game-changing approach that's set to revolutionize how businesses connect with their customers.",
-            media_url="https://media.licdn.com/dms/image/v2/D5612AQEnmrq3TJyGfw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1724710627702?e=1730332800&v=beta&t=WNMVGgc57ZNvPrW0noBPDhHCbn24YAdRJ0RANKkMu5c",
+            media_url="https://i.ibb.co/fn31YLW/image.png",
             buttons=[
                 Action(
                     type="openUrl",
@@ -163,7 +163,7 @@ read_more: RCSMessage = {
         Card(
             title="Humans (who aren't using this) are cooked: AI-personalized RCS + SMS marketing",
             subtitle="Sean Roades - August 25, 2024\nAs the lines between artificial intelligence and human interaction blur, Rich Communication Services (RCS) and SMS are undergoing a dramatic transformation. Buckle up as we dive into how this game-changing technology is not just cutting through the noise—it's rewriting the rules of customer engagement.",
-            media_url="https://media.licdn.com/dms/image/v2/D5612AQFWCMn50VZu2w/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1724618361124?e=1730332800&v=beta&t=BrZT-5ZlCfne2YBYIKPA2fPIhVZA-xN87A0XSnnhQyo",
+            media_url="https://i.ibb.co/54GWmXv/image.png",
             buttons=[
                 Action(
                     type="openUrl",
@@ -175,7 +175,7 @@ read_more: RCSMessage = {
         Card(
             title="RCS Messaging: The Overlooked Powerhouse in DTC Marketing for E-commerce",
             subtitle="Sean Roades - August 23, 2024\nIn the ever-evolving landscape of digital marketing, e-commerce brands are constantly seeking new channels to connect with customers. While email, social media, and traditional SMS have long been staples of direct-to-consumer (DTC) marketing strategies, there's a powerful channel that many marketers are overlooking: Rich Communication Services (RCS) messaging.",
-            media_url="https://media.licdn.com/dms/image/v2/D5612AQFyNp1U8jwTsg/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1724447040061?e=1730332800&v=beta&t=hnp6ZrD3pJsdOqqvvZkb1YEIgzJ39T_aulpNlJApF5Y",
+            media_url="https://i.ibb.co/0r781Z6/image.png",
             buttons=[
                 Action(
                     type="openUrl",
@@ -187,7 +187,7 @@ read_more: RCSMessage = {
         Card(
             title="The Future of Mobile Marketing is RCS, not SMS",
             subtitle="Sean Roades - August 20, 2024\nAs we look to the future of mobile marketing, one technology stands out as a game-changer: Rich Communications Services (RCS). RCS is the next generation of SMS, offering a suite of advanced messaging features that provide a more engaging and interactive experience for consumers.",
-            media_url="https://media.licdn.com/dms/image/v2/D5612AQE1oS6zlgkdjA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1724176121089?e=1730332800&v=beta&t=4dS0vWW584XSZoAW32IZ2Ls1p-QmPx6WifV3lw8owLM",
+            media_url="https://i.ibb.co/rMqwSkL/1724176121089-e-1736380800-v-beta-t-o-T4-F9v9ko-TX0-U4-Igt-Ol-Ji57l97-Uu-Jk-Sk-VIFRjt2-JNVE.jpg",
             buttons=[
                 Action(
                     type="openUrl",
@@ -199,7 +199,7 @@ read_more: RCSMessage = {
         Card(
             title="RCS in iOS 18: What You Need to Know About Apple's Android Messaging Upgrade",
             subtitle="Juli Clover - August 2, 2024\nApple is adopting Rich Communication Services (RCS) in 2024, upgrading messaging standards for non-iMessage conversations. Apple's news came as a shock when it was announced in November 2023 because Google had been aggressively pushing Apple to implement RCS for multiple years, but Apple hadn't budged.",
-            media_url="https://images.macrumors.com/t/fn2GlZzCU7X3ftCRemOYLTOkGLs=/800x0/article-new/2023/11/apple-rcs-thumb.jpg?lossy",
+            media_url="https://i.ibb.co/dm91Kfk/apple-rcs-thumb.jpg",
             buttons=[
                 Action(
                     type="openUrl",
@@ -211,7 +211,7 @@ read_more: RCSMessage = {
         Card(
             title="A Guide to RCS, Why Apple’s Adopting It, and How It Makes Texting Better",
             subtitle="David Nield - June 15, 2024\nThe messaging standard promises better security and cooler features than plain old SMS. Android has had it for years, but now iPhones are getting it too.",
-            media_url="https://media.licdn.com/dms/image/v2/D5612AQE1oS6zlgkdjA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1724176121089?e=1730332800&v=beta&t=4dS0vWW584XSZoAW32IZ2Ls1p-QmPx6WifV3lw8owLM",
+            media_url="https://i.ibb.co/YXYx8s1/01-ios.jpg",
             buttons=[
                 Action(
                     type="openUrl",
