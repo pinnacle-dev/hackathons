@@ -7,8 +7,10 @@ from dotenv import load_dotenv
 import os
 import sys
 from pydantic import TypeAdapter
-from rcs import Pinnacle, Action
 from rcs_types import InboundMessage
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from arxiv import send_functions
 
 
 class JsonFormatter(logging.Formatter):
@@ -91,16 +93,37 @@ async def receive_message(request: Request):
             # Update the RCS_URL to include the full path
             logger.info(f"Attempting to forward message to: {RCS_URL}")
 
-            response = await client.post(url=RCS_URL, json=inbound_msg.model_dump())
-            response.raise_for_status()
+            # Map the from_ field to from
+            if (
+                inbound_msg.messageType == "action"
+                and (inbound_msg.payload)
+                and (
+                    inbound_msg.payload in ["ABOUT", "SEE_MORE"]
+                    or inbound_msg.payload.startswith("PAPER_")
+                )
+            ):
+                if inbound_msg.payload == "ABOUT":
+                    send_functions.sendAboutProject(inbound_msg.from_)
+                elif inbound_msg.payload == "SEE_MORE":
+                    send_functions.sendPopularPapers(inbound_msg.from_)
+                elif inbound_msg.payload.startswith("PAPER_"):
+                    send_functions.sendAboutPaper(
+                        inbound_msg.from_, inbound_msg.payload.replace("PAPER_", "")
+                    )
+            else:
+                inbound_msg_dict = inbound_msg.model_dump()
+                inbound_msg_dict["from"] = inbound_msg_dict.pop("from_")
 
-            logger.info(
-                f"Message successfully forwarded to RCS listener. Status code: {response.status_code}"
-            )
-            return {
-                "status": "Message received and forwarded to RCS listener",
-                "rcs_response": response.text,
-            }
+                response = await client.post(url=RCS_URL, json=inbound_msg_dict)
+                response.raise_for_status()
+
+                logger.info(
+                    f"Message successfully forwarded to RCS listener. Status code: {response.status_code}"
+                )
+                return {
+                    "status": "Message received and forwarded to RCS listener",
+                    "rcs_response": response.text,
+                }
         except httpx.HTTPStatusError as e:
             logger.error(
                 f"HTTP error forwarding message to RCS listener: {e.response.status_code} - {e.response.text}"
@@ -119,15 +142,6 @@ async def receive_message(request: Request):
             logger.error(f"Unexpected error: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-
-Pinnacle(api_key=os.environ["PINNACLE_API_KEY"]).send.rcs(
-    from_="test",
-    to="+13474766425",
-    text="Hello World",
-    quick_replies=[
-        Action(title="Yes", payload="OPT_IN", type="trigger"),
-    ],
-)
 
 if __name__ == "__main__":
     logger.info("Starting RCS server. Press Ctrl+C to stop.")

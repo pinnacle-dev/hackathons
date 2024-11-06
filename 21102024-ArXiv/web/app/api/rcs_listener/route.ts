@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  sendText,
   sendUnsubscribeConfirmation,
   sendVerificationMessage,
   setUserSubscribed,
@@ -7,21 +8,19 @@ import {
 } from "../../actions";
 
 export async function POST(request: Request) {
-  console.log("Received post");
-
   try {
     const inboundMsg = await request.json();
 
     if (inboundMsg.messageType === "action") {
       console.log("Received postback:", inboundMsg);
 
-      if (inboundMsg.payload === "OPT_IN") {
+      if (inboundMsg.payload === "arxiv") {
+        await sendText(inboundMsg.from);
+      } else if (inboundMsg.payload === "OPT_IN") {
         console.log("opted in");
         await setUserSubscribed(inboundMsg.from);
         await sendVerificationMessage(inboundMsg.from);
-      }
-
-      if (inboundMsg.payload === "OPT_OUT") {
+      } else if (inboundMsg.payload === "OPT_OUT") {
         console.log("opted out");
         await setUserUnsubscribed(inboundMsg.from);
         await sendUnsubscribeConfirmation(inboundMsg.from);
