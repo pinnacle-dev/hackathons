@@ -229,6 +229,25 @@ read_more: RCSMessage = {
 }
 
 
+def create_send_rcs_message_intro(
+    from_: str,
+) -> RCSMessage:
+    return {
+        "text": "You received an RCS message from " + from_ + ". Check it out 🚀🦝",
+    }
+
+
+def create_send_rcs_message_confirmation() -> RCSMessage:
+    return {
+        "text": "Successfully sent an RCS message! Check out our other features below.",
+        "quick_replies": [
+            check_rcs_functionality_action,
+            send_rcs_message_action,
+            read_more_action,
+        ],
+    }
+
+
 def create_send_rcs_message_with_payload(
     to: str,
 ) -> RCSMessage:
@@ -249,6 +268,28 @@ def create_send_rcs_message_with_payload(
                 title="Carousel",
                 type="trigger",
                 payload=f'{{"type": "send_carousel", "to": "{to}"}}',
+            ),
+        ],
+    }
+
+
+def create_send_rcs_message_not_enabled(
+    to: str,
+) -> RCSMessage:
+    return {
+        "text": "RCS is not enabled on the target device. Do you want to send an invite via SMS to"
+        + to
+        + "?",
+        "quick_replies": [
+            Action(
+                title="Yes",
+                type="trigger",
+                payload=f'{{"type": "send_sms_invite", "to": "{to}"}}',
+            ),
+            Action(
+                title="No",
+                type="trigger",
+                payload=f'{{"type": "cancel_send_rcs_message", "to": "{to}"}}',
             ),
         ],
     }
