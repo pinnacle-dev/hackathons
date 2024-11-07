@@ -277,7 +277,7 @@ def create_send_rcs_message_not_enabled(
     to: str,
 ) -> RCSMessage:
     return {
-        "text": "RCS is not enabled on the target device. Do you want to send an invite via SMS to"
+        "text": "RCS is not enabled on the target device. Do you want to send an invite via SMS to "
         + to
         + "?",
         "quick_replies": [
