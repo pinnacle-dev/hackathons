@@ -6,6 +6,7 @@ import messages
 import database
 from dotenv import load_dotenv
 import os
+from search import search
 
 load_dotenv()
 
@@ -83,7 +84,11 @@ async def receive_msg(request: Request):
             if isinstance(prev_action, InboundActionMessage):
                 selected_action = prev_action.payload
                 if selected_action in messages.search_actions_dict:
-                    return
+                    pinn.send.rcs(
+                        from_=AGENT_ID,
+                        to=fromNumber,
+                        **search(selected_action, currLocation),
+                    )
                 else:
                     pinn.send.rcs(
                         from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg

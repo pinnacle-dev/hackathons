@@ -69,5 +69,6 @@ def create_request_location_msg(payloadValue: str) -> RCSMessage:
                     )
                 ],
             )
-        ]
+        ],
+        "quick_replies": search_actions,
     }
