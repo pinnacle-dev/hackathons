@@ -71,7 +71,7 @@ async def receive_msg(request: Request):
                 **messages.create_request_location_msg(action),
             )
             print(f"Request location message sent to {fromNumber}")
-        elif inbound_msg.actionTitle == "Send Location" and inbound_msg.payload == None:
+        elif inbound_msg.payload == None:
             return
         else:
             pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg)
