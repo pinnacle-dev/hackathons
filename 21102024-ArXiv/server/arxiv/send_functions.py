@@ -11,9 +11,7 @@ from rcs import Pinnacle, Card, Action
 
 load_dotenv()
 
-client = Pinnacle(
-    api_key=os.environ["PINNACLE_API_KEY"],
-)
+client = Pinnacle(api_key=os.environ["PINNACLE_API_KEY"])
 
 
 @dataclass
@@ -64,7 +62,7 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
         cards.append(card)
 
     quick_replies: List[Action] = [
-        Action(title=f"About this project", payload=f"ABOUT", type="trigger"),
+        Action(title=f"About this Project", payload=f"ABOUT", type="trigger"),
         Action(
             title="Join Our Discord",
             payload="https://discord.gg/tT3n4Gmf",
@@ -91,6 +89,71 @@ def sendPapers(to: str, papers: List[ArxivPaper]):
     except Exception as e:
         logging.error(f"Failed to send papers to {to}: {str(e)}")
         print(f"Failed to send papers to {to}: {str(e)}")
+
+
+def sendAboutProject(to: str):
+    quick_replies: List[Action] = [
+        Action(title="See Popular Papers", payload="SEE_MORE", type="trigger"),
+        Action(
+            title="Join Our Discord",
+            payload="https://discord.gg/tT3n4Gmf",
+            type="openUrl",
+        ),
+        Action(title="Opt out", payload="OPT_OUT", type="trigger"),
+    ]
+
+    try:
+        res = client.send.rcs(
+            from_="test",
+            to=to,
+            text="Rocket Raccoon finds the most popular papers on arXiv and sends them to you. You can also ask for a summary of any paper by sending the paper's DOI.",
+            quick_replies=quick_replies,
+        )
+        print(f"res {res}")
+        logging.info(f"Successfully sent about project to {to}")
+        print(f"Successfully sent about project to {to}")
+    except Exception as e:
+        logging.error(f"Failed to send about project to {to}: {str(e)}")
+        print(f"Failed to send about project to {to}: {str(e)}")
+
+
+def sendPopularPapers(to: str):
+    papers = get_most_popular_papers(limit=5)
+    sendPapers(to, papers)
+
+
+def sendAboutPaper(to: str, paperId: str):
+    paper = get_paper_by_id(paperId)
+    if not paper:
+        sendPapers(to, get_most_popular_papers(limit=3))
+    else:
+        quick_replies: List[Action] = [
+            Action(title=f"About this Project", payload=f"ABOUT", type="trigger"),
+            Action(
+                title="See Paper Abstract", payload=paper.abstract_link, type="openUrl"
+            ),
+            Action(title="See Popular Papers", payload="SEE_MORE", type="trigger"),
+            Action(
+                title="Join Our Discord",
+                payload="https://discord.gg/tT3n4Gmf",
+                type="openUrl",
+            ),
+            Action(title="Opt out", payload="OPT_OUT", type="trigger"),
+        ]
+
+        try:
+            res = client.send.rcs(
+                from_="test",
+                to=to,
+                text=paper.summary,
+                quick_replies=quick_replies,
+            )
+            print(f"res {res}")
+            logging.info(f"Successfully sent about paper {paperId} to {to}")
+            print(f"Successfully sent about paper {paperId} to {to}")
+        except Exception as e:
+            logging.error(f"Failed to send about paper {paperId} to {to}: {str(e)}")
+            print(f"Failed to send about paper {paperId} to {to}: {str(e)}")
 
 
 # Initialize Supabase client
@@ -162,6 +225,52 @@ def get_arxiv_papers(category="cs.ai", since=None) -> List[ArxivPaper]:
         papers.append(paper)
 
     return papers
+
+
+def get_paper_by_id(arxiv_id: str) -> Optional[ArxivPaper]:
+    """
+    Fetch an arXiv paper from the Supabase 'Arxiv' table by its arxiv_id.
+    """
+
+    result = supabase.table("Arxiv").select("*").eq("arxiv_id", arxiv_id).execute()
+
+    if not result.data:
+        return None
+
+    paper_data = result.data[0]
+
+    # Handle datetime parsing with potential fractional seconds
+    try:
+        updated = datetime.fromisoformat(paper_data["updated"])
+    except ValueError:
+        # If parsing fails, remove microseconds and try again
+        updated_str = paper_data["updated"].split(".")[0]
+        updated = datetime.fromisoformat(updated_str)
+
+    try:
+        published = datetime.fromisoformat(paper_data["published"])
+    except ValueError:
+        # If parsing fails, remove microseconds and try again
+        published_str = paper_data["published"].split(".")[0]
+        published = datetime.fromisoformat(published_str)
+
+    paper = ArxivPaper(
+        arxiv_id=paper_data["arxiv_id"],
+        title=paper_data["title"],
+        updated=updated,
+        abstract_link=paper_data["abstract_link"],
+        summary=paper_data["summary"],
+        categories=paper_data["categories"],
+        published=published,
+        announce_type=paper_data["announce_type"],
+        rights=paper_data["rights"],
+        journal_reference=paper_data["journal_reference"],
+        doi=paper_data["doi"],
+        creators=paper_data["creators"],
+        views=paper_data["views"],
+    )
+
+    return paper
 
 
 def get_most_popular_papers(limit=3) -> List[ArxivPaper]:
@@ -438,17 +547,3 @@ def get_views(DOI: str) -> int:
     except Exception as e:
         logging.error(f"Failed to get views for DOI {DOI}: {str(e)}")
         return 0
-
-
-if __name__ == "__main__":
-    # Configure logging
-    logging.basicConfig(
-        filename="arxiv_paper_updates.log",
-        level=logging.INFO,
-        format="%(asctime)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
-    logging.info("Starting ArXiv paper checker.")
-    check_for_new_papers()
-    logging.info("ArXiv paper checker finished.")

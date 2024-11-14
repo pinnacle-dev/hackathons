@@ -16,6 +16,7 @@ pinn = Pinnacle(
     api_key=os.environ["PINNACLE_API_KEY"],
 )
 AGENT_ID = os.environ["PINNACLE_AGENT_ID"]
+TEST_NUMBER = os.environ["PINNACLE_TEST_NUMBER"]
 
 
 @app.post("/")
@@ -62,15 +63,28 @@ async def receive_msg(request: Request):
                         print(f"Error message sent to {fromNumber}")
                 elif selected_action == "send_rcs_message":
                     if re.match(r"^\d{10}$", inbound_msg.text):
-                        pinn.send.rcs(
-                            from_=AGENT_ID,
-                            to=fromNumber,
-                            **messages.create_send_rcs_message_with_payload(
-                                "+1" + inbound_msg.text
-                            ),
+                        phone_number = "+1" + inbound_msg.text
+                        rcs_capabilities = pinn.get_rcs_functionality(
+                            phone_number=phone_number
                         )
+                        if not rcs_capabilities.is_enabled:
+                            pinn.send.rcs(
+                                from_=AGENT_ID,
+                                to=fromNumber,
+                                **messages.create_send_rcs_message_not_enabled(
+                                    phone_number
+                                ),
+                            )
+                        else:
+                            pinn.send.rcs(
+                                from_=AGENT_ID,
+                                to=fromNumber,
+                                **messages.create_send_rcs_message_with_payload(
+                                    phone_number
+                                ),
+                            )
 
-                        print(f"RCS functionality message sent to {fromNumber}")
+                        print(f"RCS message sent to {fromNumber}")
                     else:
                         pinn.send.rcs(
                             from_=AGENT_ID, to=fromNumber, **messages.rcs_error_msg
@@ -97,6 +111,29 @@ async def receive_msg(request: Request):
             rcs_msg_type = None
 
         if rcs_msg_type and rcs_msg_type["type"] and rcs_msg_type["to"]:
+            if rcs_msg_type["type"] == "send_sms_invite":
+                pinn.send.sms(
+                    from_=TEST_NUMBER,
+                    to=rcs_msg_type["to"],
+                    text=fromNumber
+                    + " invited you to join Pinnacle! Click the link to see a sneak peak 🚀🦝: https://www.trypinnacle.app/easter-eggs/rocket-raccoon",
+                )
+                print(f"SMS invite sent to {fromNumber}")
+                return
+            elif rcs_msg_type["type"] == "cancel_send_rcs_message":
+                pinn.send.rcs(
+                    from_=AGENT_ID,
+                    to=fromNumber,
+                    **messages.intro_msg,
+                )
+                print(f"Cancel message sent to {fromNumber}")
+                return
+
+            pinn.send.rcs(
+                from_=AGENT_ID,
+                to=rcs_msg_type["to"],
+                **messages.create_send_rcs_message_intro(fromNumber),
+            )
             if rcs_msg_type["type"] == "send_text_message":
                 pinn.send.rcs(
                     from_=AGENT_ID, to=rcs_msg_type["to"], **messages.intro_msg
@@ -115,9 +152,18 @@ async def receive_msg(request: Request):
                     **messages.pinnacle_carousel_msg,
                 )
                 print(f"Carousel message sent to {rcs_msg_type['to']}")
+            pinn.send.rcs(
+                from_=AGENT_ID,
+                to=rcs_msg_type["to"],
+                **messages.create_send_rcs_message_confirmation(),
+            )
             return
 
-        if action == "check_rcs_functionality":
+        if action == "general_rcs":
+            pinn.send.rcs(from_=AGENT_ID, to=fromNumber, **messages.intro_msg)
+            print(f"Intro message sent to {fromNumber}")
+            return
+        elif action == "check_rcs_functionality":
             pinn.send.rcs(
                 from_=AGENT_ID,
                 to=fromNumber,

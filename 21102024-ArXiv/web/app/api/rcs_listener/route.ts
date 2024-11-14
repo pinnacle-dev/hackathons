@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  sendText,
   sendUnsubscribeConfirmation,
   sendVerificationMessage,
   setUserSubscribed,
@@ -7,35 +8,22 @@ import {
 } from "../../actions";
 
 export async function POST(request: Request) {
-  console.log("Received post");
-
   try {
-    const body = await request.json();
-    console.log(body);
+    const inboundMsg = await request.json();
 
-    if (body.messageType === "postback") {
-      const { buttonPayload } = body;
+    if (inboundMsg.messageType === "action") {
+      console.log("Received postback:", inboundMsg);
 
-      const { title, payload, execute, sent, fromNum } = buttonPayload;
-
-      console.log("Received postback:", {
-        title,
-        payload,
-        execute,
-        sent,
-        fromNum,
-      });
-
-      if (payload === "OPT_IN") {
+      if (inboundMsg.payload === "arxiv") {
+        await sendText(inboundMsg.from);
+      } else if (inboundMsg.payload === "OPT_IN") {
         console.log("opted in");
-        await setUserSubscribed(fromNum);
-        await sendVerificationMessage(fromNum);
-      }
-
-      if (payload === "OPT_OUT") {
+        await setUserSubscribed(inboundMsg.from);
+        await sendVerificationMessage(inboundMsg.from);
+      } else if (inboundMsg.payload === "OPT_OUT") {
         console.log("opted out");
-        await setUserUnsubscribed(fromNum);
-        await sendUnsubscribeConfirmation(fromNum);
+        await setUserUnsubscribed(inboundMsg.from);
+        await sendUnsubscribeConfirmation(inboundMsg.from);
       }
 
       return NextResponse.json({
