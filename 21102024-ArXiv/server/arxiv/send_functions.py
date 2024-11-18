@@ -460,7 +460,12 @@ def get_all_subscribers() -> List[ArxivSubscriber]:
 
     :return: List of ArxivSubscriber objects
     """
-    result = supabase.table("ArxivSubscribers").select("*").execute()
+    result = (
+        supabase.table("HackathonSubscribers")
+        .select("*")
+        .filter("arxiv", "eq", "true")
+        .execute()
+    )
 
     subscribers = []
     for row in result.data:
