@@ -178,7 +178,10 @@ export async function setUserSubscribed(phoneNumber: string): Promise<void> {
   try {
     const { error } = await supabase
       .from("HackathonSubscribers")
-      .update({ arxiv: true })
+      .upsert(
+        { arxiv: true, phone_number: phoneNumber },
+        { onConflict: "phone_number" }
+      )
       .eq("phone_number", phoneNumber);
 
     if (error) {
@@ -196,7 +199,10 @@ export async function setUserUnsubscribed(phoneNumber: string): Promise<void> {
   try {
     const { error } = await supabase
       .from("HackathonSubscribers")
-      .update({ arxiv: false })
+      .upsert(
+        { arxiv: false, phone_number: phoneNumber },
+        { onConflict: "phone_number" }
+      )
       .eq("phone_number", phoneNumber);
 
     if (error) {
