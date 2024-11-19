@@ -1,7 +1,7 @@
 "use client";
 import { useFormStatus } from "react-dom";
 import { createSubscriber, SubscriberState, sendText } from "./actions";
-import { useState, useEffect, useActionState } from "react";
+import { useState, useEffect, useActionState, startTransition } from "react";
 import { PhoneInput } from "@/components/phone-input";
 import { AnimatedBackground } from "animated-backgrounds";
 
@@ -27,7 +27,7 @@ function SubmitButton() {
 }
 
 export default function Home() {
-  const [state, formAction] = useActionState(createSubscriber, initialState);
+  const [state, dispatch] = useActionState(createSubscriber, initialState);
   const [existingNumber, setExistingNumber] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [sending, setSending] = useState(false);
@@ -63,6 +63,7 @@ export default function Home() {
     if (state.isRegistered) {
       console.log("User registered successfully");
       const match = state.message?.match(/\+\d+/);
+      console.log("Match:", match);
       if (match) {
         console.log("Registered number found:", match[0]);
       } else {
@@ -75,7 +76,9 @@ export default function Home() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     formData.set("number", `+1${phoneNumber.replace(/\D/g, "")}`);
-    formAction(formData);
+    startTransition(() => {
+      dispatch(formData);
+    });
   };
 
   return (

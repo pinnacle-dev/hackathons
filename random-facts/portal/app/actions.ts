@@ -58,7 +58,7 @@ export const createSubscriber = async (
       ...prevState,
       isRegistered: true,
       error: null,
-      message: `${number}`,
+      message: `Message sent to ${number}`,
     };
   } catch (error: unknown) {
     console.error("Registration failed:", error);
@@ -83,15 +83,17 @@ async function registerUser(name: string, number: string): Promise<void> {
 
     // Check if the user is already registered
     const { data, error } = await supabase
-      .from("DailyFunFactsSubscribers")
+      .from("HackathonSubscribers")
       .select("*")
       .eq("phone_number", validatedData.number)
+      .filter("arxiv", "eq", true)
       .single();
 
     if (error && error.code !== "PGRST116") {
       throw new Error("Database error: " + error.message);
     }
 
+    console.log("Data:", data);
     if (data) {
       throw new Error(
         `User with phone number ${validatedData.number} is already registered`
@@ -100,12 +102,15 @@ async function registerUser(name: string, number: string): Promise<void> {
 
     // Insert new subscriber
     const { error: insertError } = await supabase
-      .from("DailyFunFactsSubscribers")
-      .insert({
-        name: validatedData.name,
-        phone_number: validatedData.number,
-        is_subscribed: false,
-      });
+      .from("HackathonSubscribers")
+      .upsert(
+        {
+          name: validatedData.name,
+          phone_number: validatedData.number,
+          arxiv: true,
+        },
+        { onConflict: "phone_number" }
+      );
 
     if (insertError) {
       throw new Error("Failed to register user: " + insertError.message);
@@ -172,8 +177,11 @@ export async function sendText(number: string): Promise<boolean> {
 export async function setUserSubscribed(phoneNumber: string): Promise<void> {
   try {
     const { error } = await supabase
-      .from("DailyFunFactsSubscribers")
-      .update({ is_subscribed: true })
+      .from("HackathonSubscribers")
+      .upsert(
+        { arxiv: true, phone_number: phoneNumber },
+        { onConflict: "phone_number" }
+      )
       .eq("phone_number", phoneNumber);
 
     if (error) {
@@ -190,8 +198,11 @@ export async function setUserSubscribed(phoneNumber: string): Promise<void> {
 export async function setUserUnsubscribed(phoneNumber: string): Promise<void> {
   try {
     const { error } = await supabase
-      .from("DailyFunFactsSubscribers")
-      .update({ is_subscribed: false })
+      .from("HackathonSubscribers")
+      .upsert(
+        { arxiv: false, phone_number: phoneNumber },
+        { onConflict: "phone_number" }
+      )
       .eq("phone_number", phoneNumber);
 
     if (error) {
