@@ -227,7 +227,7 @@ zigzagoon = Zigzagoon()
 
 DODGE_VIDEO_PATH = "https://www.dropbox.com/scl/fi/xwwsverdorfqwjetcwe17/dodgewsound.mov?rlkey=3cavfh8o75ud18czkhbukgrzb&st=5ma9bkp4&raw=1"
 THUNDERBOLT_VIDEO_PATH = "https://www.dropbox.com/scl/fi/o2ygkv5gmhzwbd51r7zac/thunderbolt.m4v?rlkey=1ozafhmmtdkinipim5p44f96w&st=t33isn6v&raw=1"
-QUICK_ATTACK_VIDEO_PATH = "https://www.dropbox.com/scl/fi/mmsad9wy66fzvdxbx9xwf/quickAttack.mp4?rlkey=6ay3cwkbuf3l689ky6ikoxou8&st=owsq0e74&raw=1"
+QUICK_ATTACK_VIDEO_PATH = "https://www.dropbox.com/scl/fi/qlwk7oi5q453r5mo4vuuk/Music-Quick-Attach.mp4?rlkey=m0wsoqv0v37gmr2ydqzcixhxl&st=5otwwfcn&raw=1"
 IRON_TAIL_VIDEO_PATH = "https://www.dropbox.com/scl/fi/yasbhrivod61t8997x2xo/Shiny-Glow.mp4?rlkey=9bwcetvw9v81wuscs5df8dgpq&st=s4krpwvg&raw=1"
 VOLT_TACKLE_VIDEO_PATH = "https://www.dropbox.com/scl/fi/o2ygkv5gmhzwbd51r7zac/thunderbolt.m4v?rlkey=1ozafhmmtdkinipim5p44f96w&st=t33isn6v&raw=1"
 ATTACK_IMAGE_URL = "https://i.ibb.co/c2RrFDx/fainted.png"
