@@ -82,9 +82,9 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-screen relative flex flex-col items-center justify-center">
       <AnimatedMessages />
-      <div className="flex flex-col items-center justify-center min-h-screen gap-y-8 p-2 text-center z-50">
+      <div className="flex flex-col items-center justify-center gap-y-8 p-2 text-center z-50">
         <div className="flex flex-col gap-y-4 items-center justify-center">
           <p className="font-mono font-bold text-3xl text-center">
             <span className="text-[#1F8AFF]">Fun Facts</span>

@@ -8,6 +8,7 @@ import os
 import sys
 from pydantic import TypeAdapter
 from rcs_types import InboundMessage
+from send import *
 
 
 class JsonFormatter(logging.Formatter):
@@ -33,8 +34,7 @@ load_dotenv()
 
 app = FastAPI()
 
-RCS_URL = "http://localhost:8000/api/rcs_listener"
-# os.environ["RCS_URL"]  # Set to dev / prod via this
+RCS_URL = os.environ["RCS_URL"]  # Set to dev / prod via this
 
 
 @app.get("/")
@@ -101,13 +101,9 @@ async def receive_message(request: Request):
                 )
             ):
                 if inbound_msg.payload == "ABOUT":
-                    send_functions.sendAboutProject(inbound_msg.from_)
+                    send_about_project(inbound_msg.from_)
                 elif inbound_msg.payload == "SEE_MORE":
-                    send_functions.sendPopularPapers(inbound_msg.from_)
-                elif inbound_msg.payload.startswith("PAPER_"):
-                    send_functions.sendAboutPaper(
-                        inbound_msg.from_, inbound_msg.payload.replace("PAPER_", "")
-                    )
+                    send_more(inbound_msg.from_)
             else:
                 inbound_msg_dict = inbound_msg.model_dump()
                 inbound_msg_dict["from"] = inbound_msg_dict.pop("from_")
@@ -143,4 +139,4 @@ async def receive_message(request: Request):
 
 if __name__ == "__main__":
     logger.info("Starting RCS server. Press Ctrl+C to stop.")
-    uvicorn.run("rcs_server:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)

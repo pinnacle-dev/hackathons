@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { z } from "zod";
 import { PinnacleClient } from "rcs-js";
 import OpenAI from "openai";
+import { RANDOM_CATEGORIES } from "@/lib/categories";
 
 const ai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"], // This is the default and can be omitted
@@ -302,17 +303,31 @@ export async function sendVerificationMessage(
 }
 
 export async function getFunFacts(
-  prev: AIContentState,
+  _: AIContentState,
   count: number
 ): Promise<AIContentState> {
+  const content = `You will provide me with ${count} great fun facts in JSON format. I want you to provide me with fun facts that are educational and interesting and different from one another. Make sure these fun facts are compliant with OpenAI's safety policy. Make sure to provide different fun facts every day based on the date and a random seed. 
+  Here are the random fun facts for ${
+    new Date().toISOString().split("T")[0]
+  } with random seed ${Math.random()}:`;
+
   const response = await ai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: `You will provide me with ${count} great fun facts in JSON format.`,
+        content,
+      },
+      {
+        role: "user",
+        content:
+          "Provide fun facts about" +
+          RANDOM_CATEGORIES.sort(() => 0.5 - Math.random())
+            .slice(0, 3)
+            .join(", "),
       },
     ],
+    temperature: 1,
     response_format: {
       type: "json_schema",
       json_schema: {
@@ -336,7 +351,6 @@ export async function getFunFacts(
       },
     },
   });
-
   const funFacts = JSON.parse(response.choices[0].message.content as string)
     .fun_facts as string[];
 

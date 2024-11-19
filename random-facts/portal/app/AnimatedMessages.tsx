@@ -53,7 +53,7 @@ export default function AnimatedMessages() {
               rotate: [0, 10, -10, 0],
               transition: { duration: 0.5 },
             }}
-            className="w-80 h-80 bg-white shadow-lg rounded-lg overflow-hidden border-slate-700"
+            className="w-80 h-80 bg-white shadow-lg rounded-lg overflow-hidden border-slate-700 pointer-events-auto"
           >
             <div className="h-1/2 bg-white">
               {state.funFacts[index].imgSrc && (
