@@ -372,7 +372,7 @@ def get_all_subscribers() -> List[ArxivSubscriber]:
             created_at=created_at,
             phone_number=row["phone_number"],
             name=row["name"],
-            is_subscribed=row["is_subscribed"],
+            is_subscribed=row["arxiv"],
         )
         subscribers.append(subscriber)
 
