@@ -1,4 +1,3 @@
-from time import sleep
 from PIL import Image, ImageDraw
 from dataclasses import dataclass
 from typing import Tuple, Literal
@@ -7,6 +6,8 @@ import os
 from imagekitio import ImageKit
 from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
 import base64
+from io import BytesIO
+import time
 
 load_dotenv()
 
@@ -18,7 +19,7 @@ class HealthBar:
     height: int = 16
     align_right: bool = False
 
-    def draw(self, draw: ImageDraw.Draw, current_health: float, max_health: float) -> None:
+    def draw_func(self, draw: ImageDraw.Draw, current_health: float, max_health: float) -> None:
         """Draw a health bar on the given ImageDraw object."""
         health_ratio = current_health / max_health
         filled_width = int(self.width * health_ratio)
@@ -108,13 +109,11 @@ def overlay_health_bars(
     enemy_max_health: float,
     user_health: float,
     user_max_health: float,
-    output_file: str = "output_with_health_bars.png",
-    upload: bool = False
+    upload: bool = True
 ) -> str:
     """
-    Overlay health bars on the background image.
-    If upload is True, uploads to ImageKit and returns the URL.
-    Otherwise returns the local file path.
+    Overlay health bars on the background image and upload directly to ImageKit.
+    Returns the ImageKit URL.
     """
     # Open the background image
     background = Image.open(background_image_path).convert("RGBA")
@@ -127,28 +126,55 @@ def overlay_health_bars(
     enemy_bar = HealthBar(x=176, y=134, align_right=True)
     user_bar = HealthBar(x=782, y=801)
 
-    enemy_bar.draw(draw, enemy_health, enemy_max_health)
-    user_bar.draw(draw, user_health, user_max_health)
+    enemy_bar.draw_func(draw, enemy_health, enemy_max_health)
+    user_bar.draw_func(draw, user_health, user_max_health)
 
-    # Combine and save
+    # Combine images
     combined = Image.alpha_composite(background, overlay)
-    # Convert to RGB and save with proper format
-    combined.convert("RGB").save(output_file, format="PNG")
-
-    sleep(2)
-
-    # Close the images to free up resources
-    background.close()
-    overlay.close()
-    combined.close()
-
+    
+    # Convert to RGB
+    final_image = combined.convert("RGB")
+    
     if upload:
         try:
-            url = upload_to_imagekit(output_file)
-            print(f"Image uploaded successfully: {url}")
-            return url
+            # Save to bytes buffer instead of file
+            buffer = BytesIO()
+            final_image.save(buffer, format="PNG")
+            image_bytes = buffer.getvalue()
+            buffer.close()
+            
+            # Convert to base64 and upload
+            base64_data = base64.b64encode(image_bytes).decode('utf-8')
+            
+            imagekit = ImageKit(
+                private_key=os.getenv('IMAGEKIT_PRIVATE_KEY'),
+                public_key=os.getenv('IMAGEKIT_PUBLIC_KEY'),
+                url_endpoint=os.getenv('IMAGEKIT_URL_ENDPOINT')
+            )
+            
+            upload_response = imagekit.upload(
+                file=base64_data,
+                file_name=f"battle_image_{int(time.time())}.png",
+                options=UploadFileRequestOptions(
+                    use_unique_file_name=True,
+                    is_private_file=False,
+                )
+            )
+            
+            if upload_response.error is not None:
+                raise Exception(f"ImageKit upload error: {upload_response.error}")
+            
+            url = upload_response.url
         except Exception as e:
             print(f"Failed to upload image: {e}")
-            return output_file
+            raise
+        finally:
+            # Clean up
+            background.close()
+            overlay.close()
+            combined.close()
+            final_image.close()
+            
+        return url
     
-    return output_file 
+    raise ValueError("Must upload=True when not saving locally") 
