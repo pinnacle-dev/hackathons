@@ -1,4 +1,4 @@
-from typing_extensions import Optional, Union, List, Literal, TypedDict, Sequence
+from typing import Optional, Union, List, Literal, TypedDict, Sequence
 from pydantic import BaseModel, Field
 from rcs import Card, Action
 
@@ -51,14 +51,9 @@ class InboundActionMessage(InboundMessageBase):
     actionMetadata: Optional[str] = None
 
 
-class Coordinates(TypedDict):
-    lat: float
-    lng: float
-
-
 class InboundLocationMessage(InboundMessageBase):
     messageType: Literal["location"]
-    coordinates: Coordinates
+    coordinates: dict
 
 
 InboundMessage = Union[
