@@ -1,4 +1,5 @@
-from rcs_types import RCSMessage
+from rcs_types import RCSMessage, Action
+from typing import List
 from openai import OpenAI
 import os
 
@@ -26,6 +27,12 @@ def stalk(query: str) -> RCSMessage:
         ],
     )
 
+    citations: List[str] = response.citations
+
     return {
         "text": response.choices[0].message.content,
+        "quick_replies": [
+            Action(title=f"Source {index + 1}", type="openUrl", payload=sourceUrl)
+            for index, sourceUrl in enumerate(citations)
+        ],
     }
