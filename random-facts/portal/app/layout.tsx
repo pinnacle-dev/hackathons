@@ -14,15 +14,15 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ArXiv AI Paper Text Updates",
-  description: "Get text updates about AI papers!",
+  title: "Fun Facts Text Updates",
+  description: "Get fun facts every day!",
   openGraph: {
     images: [
       {
         url: "https://i.ibb.co/wyhW9pn/Pitch-Deck-Pinnacle-9.png", // raccoon image
         width: 1200,
         height: 630,
-        alt: "ArXiv AI Paper Text Updates Preview",
+        alt: "Fun Facts Text Updates Preview",
       },
     ],
   },

@@ -3,6 +3,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { z } from "zod";
 import { PinnacleClient } from "rcs-js";
+import OpenAI from "openai";
+
+const ai = new OpenAI({
+  apiKey: process.env["OPENAI_API_KEY"], // This is the default and can be omitted
+});
 
 const Subscriber = z.object({
   name: z.string().min(1, "Name is required"),
@@ -35,6 +40,14 @@ const supabase = createServerClient(
 export type SubscriberState = {
   message: string | null;
   isRegistered: boolean;
+  error: string[] | null;
+};
+
+export type AIContentState = {
+  funFacts: {
+    fact: string;
+    imgSrc?: string;
+  }[];
   error: string[] | null;
 };
 
@@ -86,7 +99,7 @@ async function registerUser(name: string, number: string): Promise<void> {
       .from("HackathonSubscribers")
       .select("*")
       .eq("phone_number", validatedData.number)
-      .filter("arxiv", "eq", true)
+      .filter("fun_facts", "eq", true)
       .single();
 
     if (error && error.code !== "PGRST116") {
@@ -107,7 +120,7 @@ async function registerUser(name: string, number: string): Promise<void> {
         {
           name: validatedData.name,
           phone_number: validatedData.number,
-          arxiv: true,
+          fun_facts: true,
         },
         { onConflict: "phone_number" }
       );
@@ -148,7 +161,7 @@ export async function sendText(number: string): Promise<boolean> {
       to: number,
       cards: [
         {
-          title: `Hey it's Rosie from Pinnacle here! Would you like to opt into receiving daily updates on new AI papers from ArXiv?`,
+          title: `Hey it's Rosie from Pinnacle here! Would you like to opt into receiving daily fun facts?`,
           subtitle: "It'll be great--I promise ❤️",
           mediaUrl: ROSIE_THE_RACCOON,
         },
@@ -179,7 +192,7 @@ export async function setUserSubscribed(phoneNumber: string): Promise<void> {
     const { error } = await supabase
       .from("HackathonSubscribers")
       .upsert(
-        { arxiv: true, phone_number: phoneNumber },
+        { fun_facts: true, phone_number: phoneNumber },
         { onConflict: "phone_number" }
       )
       .eq("phone_number", phoneNumber);
@@ -200,7 +213,7 @@ export async function setUserUnsubscribed(phoneNumber: string): Promise<void> {
     const { error } = await supabase
       .from("HackathonSubscribers")
       .upsert(
-        { arxiv: false, phone_number: phoneNumber },
+        { fun_facts: false, phone_number: phoneNumber },
         { onConflict: "phone_number" }
       )
       .eq("phone_number", phoneNumber);
@@ -232,7 +245,7 @@ export async function sendUnsubscribeConfirmation(
       to: number,
       cards: [
         {
-          title: "You've been unsubscribed from ArXiv AI paper updates",
+          title: "You've been unsubscribed from Pinnacle's Daily Fun Facts!",
           subtitle:
             "We're sorry to see you go! You can always resubscribe later.",
           mediaUrl: SAD_ROSIE_THE_RACCOON,
@@ -286,4 +299,68 @@ export async function sendVerificationMessage(
     console.error("Failed to send RCS verification message:", error);
     return false;
   }
+}
+
+export async function getFunFacts(
+  prev: AIContentState,
+  count: number
+): Promise<AIContentState> {
+  const response = await ai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: `You will provide me with ${count} great fun facts in JSON format.`,
+      },
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "fun_facts_schema",
+        description: `A list of ${count} fun facts`,
+        schema: {
+          type: "object",
+          properties: {
+            fun_facts: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+              minItems: count,
+              maxItems: count,
+            },
+          },
+
+          additionalProperties: false,
+        },
+      },
+    },
+  });
+
+  const funFacts = JSON.parse(response.choices[0].message.content as string)
+    .fun_facts as string[];
+
+  const imagePromises = funFacts.map(async (fact: string) => {
+    const imageResponse = await ai.images.generate({
+      model: "dall-e-3",
+      prompt:
+        "Design an educational and realistic image for the following fun fact. Do not include text. Here is the fun fact: " +
+        fact,
+      n: 1,
+      size: "1024x1024",
+    });
+    return imageResponse.data[0].url;
+  });
+
+  const images = await Promise.all(imagePromises);
+
+  console.log("Fun facts:", funFacts, images);
+
+  return {
+    funFacts: funFacts.map((fact, index) => ({
+      fact,
+      imgSrc: images[index],
+    })),
+    error: null,
+  };
 }
