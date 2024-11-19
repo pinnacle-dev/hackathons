@@ -84,16 +84,16 @@ export default function Home() {
   return (
     <div className="w-full min-h-screen relative flex flex-col items-center justify-center">
       <AnimatedMessages />
-      <div className="flex flex-col items-center justify-center gap-y-8 p-2 text-center z-50">
+      <div className="flex flex-col items-center justify-center gap-y-8 p-4 text-center z-50 backdrop-blur-md bg-white/10 rounded-lg">
         <div className="flex flex-col gap-y-4 items-center justify-center">
           <p className="font-mono font-bold text-3xl text-center">
             <span className="text-[#1F8AFF]">Fun Facts</span>
           </p>
-          <p className="text-gray-500 max-w-xs text-center">
+          <p className="text-black lg:text-gray-500 max-w-xs text-center">
             Get fun facts every day!
           </p>
         </div>
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-8 ">
           {!existingNumber && (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input
