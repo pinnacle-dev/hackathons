@@ -135,44 +135,39 @@ class Pikachu:
         self.current_health = self.max_health
         self.defense = 100
         
-    def thunderbolt(self) -> int:
+    def thunderbolt(self) -> tuple[int, bool]:
         """High-power electric attack"""
-        if random.randint(1, 8) == 1:  # 1 in 8 chance to miss (higher chance for high damage)
-            return 0  # Attack missed
+        if random.randint(1, 8) == 1:  # 1 in 8 chance to miss
+            return 0, False  # Attack missed, not critical
         base_damage = 90
-        if random.randint(1, 16) == 1:
-            return int(base_damage * 1.5)
-        return int(base_damage)
+        is_critical = random.randint(1, 16) == 1
+        return int(base_damage * 1.5) if is_critical else base_damage, is_critical
     
-    def quick_attack(self) -> int:
+    def quick_attack(self) -> tuple[int, bool]:
         """Fast physical attack that always hits first"""
         if random.randint(1, 16) == 1:  # 1 in 16 chance to miss (lower chance)
-            return 0  # Attack missed
+            return 0, False  # Attack missed, not critical
         base_damage = 40
-        if random.randint(1, 16) == 1:
-            return int(base_damage * 1.5)
-        return int(base_damage)
+        is_critical = random.randint(1, 16) == 1
+        return int(base_damage * 1.5) if is_critical else base_damage, is_critical
     
-    def iron_tail(self) -> int:
+    def iron_tail(self) -> tuple[int, bool]:
         """Strong physical attack with chance to lower defense"""
         if random.randint(1, 8) == 1:
-            return 0  
+            return 0, False  
         base_damage = 100
-        if random.randint(1, 16) == 1:
-            return int(base_damage * 1.5)
-        return int(base_damage)
+        is_critical = random.randint(1, 16) == 1
+        return int(base_damage * 1.5) if is_critical else base_damage, is_critical
     
-    def volt_tackle(self) -> tuple[int, int]:
+    def volt_tackle(self) -> tuple[int, int, bool]:
         """Powerful electric attack that also damages the user"""
         if random.randint(1, 16) == 1:
-            return 0, 0  # Attack missed
+            return 0, 0, False  # Attack missed, not critical
         base_damage = 120
-        if random.randint(1, 16) == 1:
-            damage = int(base_damage * 1.5)
-        else:
-            damage = int(base_damage)
+        is_critical = random.randint(1, 16) == 1
+        damage = int(base_damage * 1.5) if is_critical else base_damage
         recoil = int(damage * 0.33)  # 33% recoil damage
-        return damage, recoil
+        return damage, recoil, is_critical
     
     def calculate_damage(self, base_damage: int) -> int:
         """Calculate actual damage taking defense into account"""
@@ -185,37 +180,34 @@ class Zigzagoon:
         self.current_health = self.max_health
         self.defense = 100  # Base defense value of 100%
         
-    def tackle(self) -> int:
+    def tackle(self) -> tuple[int, bool]:
         """Basic physical attack"""
-        if random.randint(1, 16) == 1:  # 1 in 16 chance to miss (lower chance)
-            return 0  # Attack missed
+        if random.randint(1, 16) == 1:  # 1 in 16 chance to miss
+            return 0, False  # Attack missed, not critical
         base_damage = 40
-        if random.randint(1, 16) == 1:
-            return int(base_damage * 1.5)
-        return int(base_damage)
+        is_critical = random.randint(1, 16) == 1
+        return int(base_damage * 1.5) if is_critical else base_damage, is_critical
     
-    def headbutt(self) -> int:
+    def headbutt(self) -> tuple[int, bool]:
         """Stronger physical attack with chance to flinch"""
-        if random.randint(1, 12) == 1:  # 1 in 12 chance to miss (medium chance)
-            return 0  # Attack missed
+        if random.randint(1, 12) == 1:  # 1 in 12 chance to miss
+            return 0, False  # Attack missed, not critical
         base_damage = 70
-        if random.randint(1, 16) == 1:
-            return int(base_damage * 1.5)
-        return int(base_damage)
+        is_critical = random.randint(1, 16) == 1
+        return int(base_damage * 1.5) if is_critical else base_damage, is_critical
     
-    def pin_missile(self) -> int:
+    def pin_missile(self) -> tuple[int, bool]:
         """Hits 2-5 times in succession"""
-        if random.randint(1, 16) == 1:  # 1 in 16 chance to miss (lower chance)
-            return 0  # Attack missed
+        if random.randint(1, 16) == 1:  # 1 in 16 chance to miss
+            return 0, False  # Attack missed, not critical
         base_damage = 25  # Per hit
-        if random.randint(1, 16) == 1:
-            return int(base_damage * 1.5)
-        return int(base_damage)
+        is_critical = random.randint(1, 16) == 1
+        return int(base_damage * 1.5) if is_critical else base_damage, is_critical
     
-    def tail_whip(self, target: 'Pikachu') -> int:
+    def tail_whip(self, target: 'Pikachu') -> tuple[int, bool]:
         """Lowers opponent's defense"""
         target.defense = max(50, target.defense - 20)
-        return 0
+        return 0, False  # Return damage (always 0) and is_critical (always False)
         
     def calculate_damage(self, base_damage: int) -> int:
         """Calculate actual damage taking defense into account"""
@@ -254,7 +246,7 @@ def perform_zigzagoon_attack(health_bar_image_url: str) -> bool:
     attack_index = random.randint(0, len(zigzagoon_attacks) - 1)
     attack_func, attack_name = zigzagoon_attacks[attack_index]
     
-    damage = attack_func()  # Execute the chosen attack
+    damage, is_critical = attack_func()  # Execute the chosen attack
     
     if damage == 0:
         if attack_func == zigzagoon.tail_whip:
@@ -264,7 +256,7 @@ def perform_zigzagoon_attack(health_bar_image_url: str) -> bool:
                 cards=[Card(
                     media_url=health_bar_image_url,
                     title="Zigzagoon used Tail Whip!",
-                    subtitle="Pikachu's defense was lowered."
+                    subtitle="Pikachu's defense fell!"
                 )]
             )
         else:
@@ -274,7 +266,7 @@ def perform_zigzagoon_attack(health_bar_image_url: str) -> bool:
                 cards=[Card(
                     media_url=health_bar_image_url,
                     title=f"Zigzagoon used {attack_name.replace('_', ' ').title()}!",
-                    subtitle="The attack missed!"
+                    subtitle="But it missed!"
                 )]
             )
         return True
@@ -303,13 +295,14 @@ def perform_zigzagoon_attack(health_bar_image_url: str) -> bool:
         upload=True
     )
     
+    subtitle = "A critical hit!" if is_critical else "The attack landed!"
     client.send.rcs(
         from_="test",
         to=TO_NUM,
         cards=[Card(
             media_url=updated_health_bar_image_url,
             title=f"Zigzagoon used {attack_name.replace('_', ' ').title()}!",
-            subtitle=f"Pikachu took {damage} damage."
+            subtitle=f"{subtitle} Pikachu took {damage} damage!"
         )]
     )
     return True
@@ -322,8 +315,7 @@ def finish_turn() -> None:
             to=TO_NUM,
             cards=[Card(
                 media_url=ATTACK_IMAGE_URL,
-                title="Victory!",
-                subtitle="The wild Zigzagoon fainted! You won the battle!"
+                title="The wild Zigzagoon fainted!"
             )]
         )
         return
@@ -412,7 +404,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
             
             case "THUNDERBOLT":
                 print("THUNDERBOLT", THUNDERBOLT_VIDEO_PATH)
-                damage = pikachu.thunderbolt()
+                damage, is_critical = pikachu.thunderbolt()
                 if damage == 0:
                     client.send.rcs(
                         from_="test",
@@ -420,14 +412,15 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
                         cards=[
                             Card(
                                 media_url=DODGE_VIDEO_PATH,
-                                title="Pikachu's Attack Missed!",
-                                subtitle="Zigzagoon dodged the attack."
+                                title="Pikachu used Thunderbolt!",
+                                subtitle="But it missed!"
                             )
                         ]
                     )
-                    return {"status": "ok", "message": "Pikachu's Attack Missed!"}
+                    return {"status": "ok", "message": "Attack missed"}
                 
                 zigzagoon.current_health -= damage
+                subtitle = "A critical hit! " if is_critical else ""
                 res = client.send.rcs(
                     from_="test",
                     to=TO_NUM,
@@ -435,7 +428,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
                         Card(
                             media_url=THUNDERBOLT_VIDEO_PATH,
                             title="Pikachu used Thunderbolt!",
-                            subtitle=f"Zigzagoon took {damage} damage."
+                            subtitle=f"{subtitle}Zigzagoon took {damage} damage!"
                         )
                     ]
                 )
@@ -445,7 +438,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
 
             case "QUICK_ATTACK":
                 print("QUICK_ATTACK")
-                damage = pikachu.quick_attack()
+                damage, is_critical = pikachu.quick_attack()
                 if damage == 0:
                     client.send.rcs(
                         from_="test",
@@ -461,6 +454,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
                     return {"status": "ok", "message": "Pikachu's Attack Missed!"}
                 
                 zigzagoon.current_health -= damage
+                subtitle = "A critical hit! " if is_critical else ""
                 res = client.send.rcs(
                     from_="test",
                     to=TO_NUM,
@@ -468,7 +462,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
                         Card(
                             media_url=QUICK_ATTACK_VIDEO_PATH,
                             title="Pikachu used Quick Attack!",
-                            subtitle=f"Zigzagoon took {damage} damage."
+                            subtitle=f"{subtitle}Zigzagoon took {damage} damage!"
                         )
                     ]
                 )
@@ -478,7 +472,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
 
             case "IRON_TAIL":
                 print("IRON_TAIL")
-                damage = pikachu.iron_tail()
+                damage, is_critical = pikachu.iron_tail()
                 if damage == 0:
                     client.send.rcs(
                         from_="test",
@@ -494,6 +488,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
                     return {"status": "ok", "message": "Pikachu's Attack Missed!"}
                 
                 zigzagoon.current_health -= damage
+                subtitle = "A critical hit! " if is_critical else ""
                 res = client.send.rcs(
                     from_="test",
                     to=TO_NUM,
@@ -501,7 +496,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
                         Card(
                             media_url=IRON_TAIL_VIDEO_PATH,
                             title="Pikachu used Iron Tail!",
-                            subtitle=f"Zigzagoon took {damage} damage."
+                            subtitle=f"{subtitle}Zigzagoon took {damage} damage!"
                         )
                     ]
                 )
@@ -511,7 +506,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
 
             case "VOLT_TACKLE": 
                 print("VOLT_TACKLE")
-                damage, recoil = pikachu.volt_tackle()
+                damage, recoil, is_critical = pikachu.volt_tackle()
                 if damage == 0:
                     client.send.rcs(
                         from_="test",
@@ -528,6 +523,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
                 
                 zigzagoon.current_health -= damage
                 pikachu.current_health -= recoil
+                subtitle = "A critical hit! " if is_critical else ""
                 res = client.send.rcs(
                     from_="test",
                     to=TO_NUM,
@@ -535,7 +531,7 @@ async def webhook(message: ActionMessage) -> Dict[str, str]:
                         Card(
                             media_url=VOLT_TACKLE_VIDEO_PATH,
                             title="Pikachu used Volt Tackle!",
-                            subtitle=f"Zigzagoon took {damage} damage and Pikachu took {recoil} recoil damage."
+                            subtitle=f"{subtitle}Zigzagoon took {damage} damage and Pikachu took {recoil} recoil damage!"
                         )
                     ]
                 )
