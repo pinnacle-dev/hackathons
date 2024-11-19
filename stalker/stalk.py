@@ -27,7 +27,7 @@ def stalk(query: str) -> RCSMessage:
         ],
     )
 
-    citations: List[str] = response.citations
+    citations: List[str] = response.citations  # type: ignore
 
     return {
         "text": response.choices[0].message.content,
