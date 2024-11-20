@@ -3,7 +3,7 @@ import { useFormStatus } from "react-dom";
 import { createSubscriber, SubscriberState, sendText } from "./actions";
 import { useState, useEffect, useActionState, startTransition } from "react";
 import { PhoneInput } from "@/components/phone-input";
-import { AnimatedBackground } from "animated-backgrounds";
+import AnimatedMessages from "@/app/AnimatedMessages";
 
 // Define the initial state and action
 const initialState: SubscriberState = {
@@ -18,7 +18,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className="py-2 px-4 bg-[#83ff85] text-black rounded-none focus:outline-none focus:ring-2 focus:ring-[#303030] font-mono hover:bg-[#5ff562] transition-colors duration-100"
+      className="py-2 px-4 bg-[#1F8AFF] text-black rounded-none focus:outline-none focus:ring-2 focus:ring-[#303030] font-mono hover:bg-[#2546ff] transition-colors duration-100"
       disabled={pending}
     >
       {pending ? "Submitting..." : "Opt In"}
@@ -82,21 +82,18 @@ export default function Home() {
   };
 
   return (
-    <div className="">
-      <AnimatedBackground
-        animationName="matrixRain"
-        style={{ opacity: 0.2 }} // Add any additional CSS styles
-      />
-      <div className="flex flex-col items-center justify-center min-h-screen gap-y-8 p-2 text-center">
+    <div className="w-full min-h-screen relative flex flex-col items-center justify-center">
+      <AnimatedMessages />
+      <div className="flex flex-col items-center justify-center gap-y-8 p-4 text-center z-50 backdrop-blur-md bg-white/10 rounded-lg">
         <div className="flex flex-col gap-y-4 items-center justify-center">
           <p className="font-mono font-bold text-3xl text-center">
-            <span className="text-[#83ff85]">ArXiv</span> Updates
+            <span className="text-[#1F8AFF]">Fun Facts</span>
           </p>
-          <p className="text-gray-500 max-w-xs text-center">
-            Stay up to late with the latest AI papers via our RCS newsletter
+          <p className="text-black lg:text-gray-500 max-w-xs text-center">
+            Get fun facts every day!
           </p>
         </div>
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-8 ">
           {!existingNumber && (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input
@@ -125,7 +122,7 @@ export default function Home() {
                   opt in / opt out menu, you can{" "}
                   <button
                     onClick={() => handleSendText(existingNumber ?? "")}
-                    className="underline text-[#83ff85]"
+                    className="underline text-[#1F8AFF]"
                   >
                     resend here
                   </button>{" "}
@@ -134,7 +131,7 @@ export default function Home() {
                     onClick={() => {
                       setExistingNumber(null);
                     }}
-                    className="underline text-[#83ff85]"
+                    className="underline text-[#1F8AFF]"
                   >
                     register another number here
                   </button>

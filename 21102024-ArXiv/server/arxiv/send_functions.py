@@ -460,7 +460,12 @@ def get_all_subscribers() -> List[ArxivSubscriber]:
 
     :return: List of ArxivSubscriber objects
     """
-    result = supabase.table("ArxivSubscribers").select("*").execute()
+    result = (
+        supabase.table("HackathonSubscribers")
+        .select("*")
+        .filter("arxiv", "eq", "true")
+        .execute()
+    )
 
     subscribers = []
     for row in result.data:
@@ -476,7 +481,7 @@ def get_all_subscribers() -> List[ArxivSubscriber]:
             created_at=created_at,
             phone_number=row["phone_number"],
             name=row["name"],
-            is_subscribed=row["is_subscribed"],
+            is_subscribed=row["arxiv"],
         )
         subscribers.append(subscriber)
 
